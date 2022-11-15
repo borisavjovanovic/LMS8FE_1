@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -pthread  -shared -Wl,-soname,libLMS8FEAPI.so -o libLMS8FEAPI.so CMakeFiles/LMS8FEAPI.dir/LMS8FE_cmd.cpp.o CMakeFiles/LMS8FEAPI.dir/LMS8FE_api.cpp.o CMakeFiles/LMS8FEAPI.dir/LMS8FE_Device.cpp.o  -L/usr/local/lib 

@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread  -rdynamic CMakeFiles/LMS8FE_USB_example.dir/LMS8FE_USB_example.cpp.o  -o ../../bin/LMS8FE_USB_example  -L/usr/local/lib -Wl,-rpath,/usr/local/lib:/home/limenet1/Work/PCIe_5GRadio_3v1/D20221027/LMS8FE_1/build/LMS8FE ../libLMS8FEAPI.so 
