@@ -1,7 +1,11 @@
 #include "LMS8FE_constants.h"
 #include "INI.h"
 #include <chrono>
+#include "lime/lms7_device.h"
+//#include "LimeSuite.h"
 
+#define MADDRESS 1024
+#define MADDRESS2 1024 + 32
 /*********************************************************************************************
  * USB Communication
  **********************************************************************************************/
@@ -235,6 +239,11 @@ int Lms8fe_serialport_close(LMS8FE_COM com)
 	return result;
 }
 
+
+int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size);
+int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size);
+
+
 int Lms8fe_write_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, int size)
 {
 	if (com.fd >= 0)
@@ -243,7 +252,9 @@ int Lms8fe_write_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, 
 	}
 	else if (dev != NULL)
 	{
-		return Lms8fe_i2c_write_buffer(dev, data, size);
+		// B.J.
+		// return Lms8fe_i2c_write_buffer(dev, data, size);
+		return Lms8fe_spi_write_buffer(dev, data, size);
 	}
 	return -1; // error: both dev and fd are invalid
 }
@@ -267,7 +278,9 @@ int Lms8fe_read_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, i
 	}
 	else if (dev != NULL)
 	{
-		return Lms8fe_i2c_read_buffer(dev, data, size);
+		// B.J.
+		//return Lms8fe_i2c_read_buffer(dev, data, size);
+		return Lms8fe_spi_read_buffer(dev, data, size);
 	}
 	return -1; // error: both dev and fd are invalid
 }
@@ -1284,3 +1297,60 @@ int Lms8fe_Cmd_Get_Config_Full(lms_device_t *dev, LMS8FE_COM com, uint8_t *state
 
 	return result;
 }
+
+// B.J.
+// temporary, to be tested
+
+int SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data)
+{
+	uint16_t addr = address + maddress;
+	int ret = 0;
+	if (LMS_WriteFPGAReg(lms, addr, data) != 0)
+		ret = -1;
+	return ret;
+}
+
+int SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t *data)
+{
+	uint16_t addr = address + maddress;
+	int ret = 0;
+	uint16_t regValue = 0x0000;
+	LMS_ReadFPGAReg(lms, addr, &regValue);
+	*data = regValue;
+	return ret;
+}
+
+int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size)
+{
+	// size is 16 or 64. Units - bytes
+	uint16_t maddress = MADDRESS;
+	uint16_t maddress2 = MADDRESS2;
+
+	uint16_t data = 0;
+
+	for (int i = 0; i < size / 2; i++)  // transfer data
+	{
+		data = (uint16_t)(c[2 * i + 1]);
+		data = data << 8;
+		data += (uint16_t)(c[2 * i]);
+		SPI_write(lms, maddress, i, data);
+	}
+	SPI_write(lms, maddress2, 0, 0x0001); // start the Do_command()
+	return 0;
+}
+
+int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
+{
+	uint16_t maddress = MADDRESS;
+	uint16_t maddress2 = MADDRESS2;
+	uint16_t data = 0;
+
+	for (int i = 0; i < size / 2; i++)
+	{
+		SPI_read(lms, maddress, i, &data);
+		c[2 * i + 1] = (uint8_t)(data >> 8);
+		c[2 * i] = (uint8_t)(data & 0x00FF);
+	}
+}
+
+// end B.J.
