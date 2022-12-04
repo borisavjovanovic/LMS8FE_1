@@ -1273,6 +1273,7 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	btnSC1905_EEPROM_Execute->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_EEPROM_Execute), NULL, this);
 	gridSC1905_EEPROM_Parameters->Connect(wxEVT_GRID_CELL_CHANGED, wxGridEventHandler(LMS8FE_view::OnGridCellChangegridSC1905_EEPROM_Parameters), NULL, this);
 	btnClearMessages->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnClearMessages), NULL, this);
+ 	btnTESTSPI->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnTESTSPI), NULL, this);  //B.J.
 }
 
 LMS8FE_view::~LMS8FE_view()
@@ -1356,4 +1357,5 @@ LMS8FE_view::~LMS8FE_view()
 	btnSC1905_EEPROM_Execute->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_EEPROM_Execute), NULL, this);
 	gridSC1905_EEPROM_Parameters->Disconnect(wxEVT_GRID_CELL_CHANGED, wxGridEventHandler(LMS8FE_view::OnGridCellChangegridSC1905_EEPROM_Parameters), NULL, this);
 	btnClearMessages->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnClearMessages), NULL, this);
+	btnTESTSPI->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnTESTSPI), NULL, this);  //B.J.
 }
