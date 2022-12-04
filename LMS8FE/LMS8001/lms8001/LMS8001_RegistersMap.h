@@ -3,9 +3,11 @@
 
 #include <vector>
 #include <map>
-#include <typedefs.h>
+#include "typedefs.h"
 
 struct LMS8Parameter;
+
+//namespace lime {
 
 class LMS8001_RegistersMap
 {
@@ -35,5 +37,5 @@ protected:
 //    std::map<const uint16_t, Register> mChannelA;
 //    std::map<const uint16_t, Register> mChannelB;
 };
-
+//}
 #endif

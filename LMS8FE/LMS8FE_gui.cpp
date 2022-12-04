@@ -66,7 +66,6 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	rbI2C = new wxRadioButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("SDR"), wxDefaultPosition, wxSize(-1, -1), wxRB_GROUP);
 	rbI2C->SetValue(true);
 	bSizer19->Add(rbI2C, 0, wxALL, 1);
-
 	bSizer21->Add(bSizer19, 1, wxEXPAND, 0);
 
 	wxBoxSizer *bSizer20;
@@ -74,9 +73,11 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 
 	rbUSB = new wxRadioButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("Direct (USB)"), wxDefaultPosition, wxSize(-1, -1), 0);
 	bSizer20->Add(rbUSB, 0, wxALL, 1);
-
 	bSizer21->Add(bSizer20, 1, wxEXPAND, 0);
 
+	btnTESTSPI = new wxButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("TEST SPI"), wxDefaultPosition, wxSize(-1, -1), 0);
+	bSizer21->Add(btnTESTSPI, 0, wxALL, 1);
+	
 	sbSizer31->Add(bSizer21, 1, wxEXPAND, 0);
 
 	bSizer15->Add(sbSizer31, 1, wxEXPAND, 1);
@@ -453,35 +454,6 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	m_panel13->Layout();
 	fgSizer18->Fit(m_panel13);
 	fgSizer2->Add(m_panel13, 1, wxEXPAND | wxALL, 2);
-
-	wxFlexGridSizer *fgSizer1;
-	fgSizer1 = new wxFlexGridSizer(0, 0, 0, 0);
-	fgSizer1->SetFlexibleDirection(wxBOTH);
-	fgSizer1->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
-
-	pnlConfiguration = new wxPanel(pnlMain, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), wxTAB_TRAVERSAL | wxBORDER_RAISED);
-	pnlConfiguration->Hide();
-
-	wxStaticBoxSizer *sbSizer9;
-	sbSizer9 = new wxStaticBoxSizer(new wxStaticBox(pnlConfiguration, wxID_ANY, wxT("LMS8FE Test")), wxVERTICAL);
-
-	wxBoxSizer *bSizer251;
-	bSizer251 = new wxBoxSizer(wxHORIZONTAL);
-
-	tbtnDiode = new wxToggleButton(sbSizer9->GetStaticBox(), wxID_ANY, wxT("Diode"), wxDefaultPosition, wxDefaultSize, 0);
-	bSizer251->Add(tbtnDiode, 0, wxALL, 5);
-
-	tbtnDiodeSPI = new wxToggleButton(sbSizer9->GetStaticBox(), wxID_ANY, wxT("Diode SPI"), wxDefaultPosition, wxDefaultSize, 0);
-	bSizer251->Add(tbtnDiodeSPI, 0, wxALL, 5);
-
-	sbSizer9->Add(bSizer251, 1, wxEXPAND, 5);
-
-	pnlConfiguration->SetSizer(sbSizer9);
-	pnlConfiguration->Layout();
-	sbSizer9->Fit(pnlConfiguration);
-	fgSizer1->Add(pnlConfiguration, 1, wxEXPAND, 5);
-
-	fgSizer2->Add(fgSizer1, 0, wxEXPAND, 2);
 
 	pnlMain->SetSizer(fgSizer2);
 	pnlMain->Layout();
@@ -1276,9 +1248,6 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	cbTXRX_2->Connect(wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler(LMS8FE_view::OnDetailedChange), NULL, this);
 	btnApplyData->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnApplyData), NULL, this);
 	btnReadData->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnReadData), NULL, this);
-	pnlConfiguration->Connect(wxEVT_ERASE_BACKGROUND, wxEraseEventHandler(LMS8FE_view::OnEraseBackground_pnlConfiguration), NULL, this);
-	tbtnDiode->Connect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OntbtnDiode), NULL, this);
-	tbtnDiodeSPI->Connect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OntbtnDiodeSPI), NULL, this);
 	btnSC1905_Read_FW_Version->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_Read_FW_Version), NULL, this);
 	btnSC1905_Read_Product_ID->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_Read_Product_ID), NULL, this);
 	chSC1905_Update_Rate->Connect(wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler(LMS8FE_view::OnchSC1905_Update_Rate), NULL, this);
@@ -1362,9 +1331,6 @@ LMS8FE_view::~LMS8FE_view()
 	cbTXRX_2->Disconnect(wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler(LMS8FE_view::OnDetailedChange), NULL, this);
 	btnApplyData->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnApplyData), NULL, this);
 	btnReadData->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnReadData), NULL, this);
-	pnlConfiguration->Disconnect(wxEVT_ERASE_BACKGROUND, wxEraseEventHandler(LMS8FE_view::OnEraseBackground_pnlConfiguration), NULL, this);
-	tbtnDiode->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OntbtnDiode), NULL, this);
-	tbtnDiodeSPI->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OntbtnDiodeSPI), NULL, this);
 	btnSC1905_Read_FW_Version->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_Read_FW_Version), NULL, this);
 	btnSC1905_Read_Product_ID->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_Read_Product_ID), NULL, this);
 	chSC1905_Update_Rate->Disconnect(wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler(LMS8FE_view::OnchSC1905_Update_Rate), NULL, this);

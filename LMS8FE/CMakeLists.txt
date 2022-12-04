@@ -17,11 +17,23 @@ set(LMS8FEAPI_SOURCES
     LMS8FE_cmd.cpp
     LMS8FE_api.cpp
     LMS8FE_Device.cpp
+#milans 221128	
+	LMS8001/API/lms8_device.cpp
+	LMS8001/lms8001/connectionManager/ConnectionManager.cpp
+	LMS8001/lms8001/connectionManager/ConnectionCOM.cpp
+	LMS8001/lms8001/LMS8001.cpp
+	LMS8001/lms8001/lmsComms.cpp
+	LMS8001/lms8001/LMS8001_RegistersMap.cpp
+	LMS8001/lms8001/LMS8001_parameters.cpp    
 )
 
 SET(LMS8FEAPI_INCLUDES
     external/cpp-feather-ini-parser
 #    LMS8001
+#milans 221128
+	LMS8001/ADF4002
+	LMS8001/API
+	LMS8001/lms8001
 )
 
 #if(MSVC)
@@ -79,3 +91,4 @@ install(TARGETS LMS8FEAPI
     ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
     RUNTIME DESTINATION bin              # .dll file
 )
+

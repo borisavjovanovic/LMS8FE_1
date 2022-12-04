@@ -10,7 +10,8 @@ int openPort(char* portName);
 void closePort(int fd);
 
 int main(int argc, char** argv)
-{
+{	
+/*	
 	if (argc != 2)
 	{
 		printf("Error: Wrong number of parameters\n");
@@ -20,16 +21,19 @@ int main(int argc, char** argv)
 	}
 
 	//Open port
-        lms8fe_dev_t* rfe = LMS8FE_Open(argv[1], nullptr);
+        lms8fe_dev_t* lms8fe = LMS8FE_Open(argv[1], nullptr);
+*/
+	//milans 221201 TMP TMP TMP TMP TMP
+	lms8fe_dev_t* lms8fe = LMS8FE_Open("COM4", nullptr);
 
-	if (rfe == nullptr) {
+	if (lms8fe == nullptr) {
 		std::cout << "Error: failed to open device" << std::endl;
 		return -1;
 	}
 	else {
 		std::cout << "Port opened" << std::endl;
 	}
-
+/*
 	//Configure LimeRFE to use channel HAM 2m channel in receive mode.
 	//Transmit output is routed to TX/RX output. Notch is off. Attenuation is 0.
 	LMS8FE_Configure(rfe, LMS8FE_CID_HAM_0145, LMS8FE_CID_HAM_0145, LMS8FE_PORT_1, LMS8FE_PORT_1, LMS8FE_MODE_RX, 
@@ -43,12 +47,25 @@ int main(int argc, char** argv)
 	LMS8FE_Mode(rfe, LMS8FE_MODE_TX);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+*/	
 
 	//Reset LimeRFE
-	LMS8FE_Reset(rfe);
+	LMS8FE_Reset(lms8fe);
+
+	lms8fe_boardState state;
+	int result;	
+	result = LMS8FE_GetState(lms8fe, &state);
+	printf("state.DA1_EN = %d\n", state.DA1_EN);
+
+	state.DA1_EN = 1;
+
+	result = LMS8FE_SetState(lms8fe, state);
+
+	result = LMS8FE_GetState(lms8fe, &state);
+	printf("state.DA1_EN = %d\n", state.DA1_EN);
 
 	//Close port
-	LMS8FE_Close(rfe);
+	LMS8FE_Close(lms8fe);
 
 	return 0;
 }

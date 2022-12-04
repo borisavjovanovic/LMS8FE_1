@@ -27,7 +27,6 @@
 #include <wx/checkbox.h>
 #include <wx/stattext.h>
 #include <wx/notebook.h>
-#include <wx/tglbtn.h>
 #include <wx/textctrl.h>
 #include <wx/choice.h>
 #include <wx/gauge.h>
@@ -51,6 +50,9 @@ protected:
 	wxPanel *m_panel15;
 	wxRadioButton *rbI2C;
 	wxRadioButton *rbUSB;
+
+    wxButton *btnTESTSPI; // B.J.
+
 	wxPanel *m_panel161;
 	wxComboBox *cmbbPorts;
 	wxButton *btnRefreshPorts;
@@ -111,9 +113,6 @@ protected:
 	wxCheckBox *cbTXRX_2;
 	wxButton *btnApplyData;
 	wxButton *btnReadData;
-	wxPanel *pnlConfiguration;
-	wxToggleButton *tbtnDiode;
-	wxToggleButton *tbtnDiodeSPI;
 	wxPanel *pnlRFPAL;
 	wxPanel *m_panel8;
 	wxButton *btnSC1905_Read_FW_Version;
@@ -240,9 +239,6 @@ protected:
 	virtual void OnEraseBackground_pnlChannel(wxEraseEvent &event) { event.Skip(); }
 	virtual void OnSimpleChanged(wxCommandEvent &event) { event.Skip(); }
 	virtual void OnbtnApplyData(wxCommandEvent &event) { event.Skip(); }
-	virtual void OnEraseBackground_pnlConfiguration(wxEraseEvent &event) { event.Skip(); }
-	virtual void OntbtnDiode(wxCommandEvent &event) { event.Skip(); }
-	virtual void OntbtnDiodeSPI(wxCommandEvent &event) { event.Skip(); }
 	virtual void OnbtnSC1905_Read_FW_Version(wxCommandEvent &event) { event.Skip(); }
 	virtual void OnbtnSC1905_Read_Product_ID(wxCommandEvent &event) { event.Skip(); }
 	virtual void OnchSC1905_Update_Rate(wxCommandEvent &event) { event.Skip(); }
@@ -268,6 +264,8 @@ protected:
 	virtual void OnbtnSC1905_EEPROM_Execute(wxCommandEvent &event) { event.Skip(); }
 	virtual void OnGridCellChangegridSC1905_EEPROM_Parameters(wxGridEvent &event) { event.Skip(); }
 	virtual void OnbtnClearMessages(wxCommandEvent &event) { event.Skip(); }
+
+	virtual void OnbtnTESTSPI(wxCommandEvent &event) { event.Skip(); }  // B.J.
 
 public:
 	LMS8FE_view(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString &title = wxT("LMS8FE Control"), const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxSize(-1, -1), long style = wxCAPTION | wxCLOSE_BOX | wxMINIMIZE_BOX | wxSYSTEM_MENU | wxTAB_TRAVERSAL);

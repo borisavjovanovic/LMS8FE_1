@@ -17,6 +17,13 @@
 #include <chrono>
 #include <thread>
 
+//milans 221124
+///define for parameter enumeration if prefix might be needed
+extern std::vector<const LMS8Parameter*> LMS8parameterList;
+
+//using namespace std;
+//using namespace lime;
+
 //float_type LMS8001::gVCO_frequency_table[3][2] = { { 3800, 5222 }, { 4961, 6754 }, {6306, 7714} };
 //float_type LMS8001::gCGEN_VCO_frequencies[2] = {2000, 2700};
 
@@ -199,13 +206,14 @@ liblms8_status LMS8001::LoadConfig(const char* filename)
     @return 0-success, other failure
 */
 liblms8_status LMS8001::SaveConfig(const char* filename)
-{
+{ 
+    /*	*/	   
     liblms8_status status;
     typedef INI<> ini_t;
-    ini_t myparser(filename, true);
-    myparser.create("file_info");
-    myparser.set("type", "lms8001_minimal_config");
-    myparser.set("version", 1);
+    ini_t parser(filename, true);
+    parser.create("file_info");
+    parser.set("type", "lms8001_minimal_config");
+    parser.set("version", 1);
 
     char addr[80];
     char value[80];
@@ -219,7 +227,7 @@ liblms8_status LMS8001::SaveConfig(const char* filename)
     vector<uint16_t> dataReceived;
     dataReceived.resize(addrToRead.size(), 0);
 
-    myparser.create("lms8001_registers");
+    parser.create("lms8001_registers");
     //	Modify_SPI_Reg_bits(LMS8param(MAC), 1);
     //msavic I commented this out so I can write the data from the GUI instead from the Board
     status = SPI_read_batch(&addrToRead[0], &dataReceived[0], addrToRead.size());
@@ -233,56 +241,33 @@ liblms8_status LMS8001::SaveConfig(const char* filename)
 
         sprintf(value, "0x%04X", dataReceived[i]);
 
-        myparser.set(addr, value);
+        parser.set(addr, value);
     }
-
-    myparser.create("reference_clock");
-    myparser.set("ref_clk_mhz", mRefClk_MHz);
-
-    myparser.create("temp_sens_coeff");
-    myparser.set("T0", tempSens_T0);
-
-    myparser.save(filename);
-
-    return LIBLMS8_SUCCESS;
-
 /*
-	liblms8_status status;
-	typedef INI<> ini_t;
-	ini_t parser(filename, true);
-	parser.create("file_info");
-	parser.set("type", "lms8001_minimal_config");
-	parser.set("version", 1);
-
-	char addr[80];
-	char value[80];
-
-//	uint8_t ch = (uint8_t)Get_SPI_Reg_bits(LMS8param(MAC));
-
-	vector<uint16_t> addrToRead;
+	parser.create("lms7002_registers_b");
+	addrToRead.clear(); //add only B channel addresses
 	for (uint8_t i = 0; i < MEMORY_SECTIONS_COUNT; ++i)
 		for (uint16_t addr = MemorySectionAddresses[i][0]; addr <= MemorySectionAddresses[i][1]; ++addr)
-			addrToRead.push_back(addr);
-	vector<uint16_t> dataReceived;
-	dataReceived.resize(addrToRead.size(), 0);
+			if (addr >= 0x0100)
+				addrToRead.push_back(addr);
 
-	parser.create("lms8001_registers");
-//	Modify_SPI_Reg_bits(LMS8param(MAC), 1);
-//msavic I commented this out so I can write the data from the GUI instead from the Board
+	Modify_SPI_Reg_bits(LMS7param(MAC), 2);
 	status = SPI_read_batch(&addrToRead[0], &dataReceived[0], addrToRead.size());
 
 	for (uint16_t i = 0; i < addrToRead.size(); ++i)
 	{
 		sprintf(addr, "0x%04X", addrToRead[i]);
-
-//msavic Added line to Save from GUI
-		uint16_t data_tmp = mRegistersMap->GetValue(addrToRead[i]);
-
 		sprintf(value, "0x%04X", dataReceived[i]);
-
 		parser.set(addr, value);
 	}
 
+	Modify_SPI_Reg_bits(LMS7param(MAC), ch); //retore previously used channel
+
+	parser.create("reference_clocks");
+	parser.set("sxt_ref_clk_mhz", mRefClkSXT_MHz);
+	parser.set("sxr_ref_clk_mhz", mRefClkSXR_MHz);
+*/
+    //msavic ovdi!!!
 	parser.create("reference_clock");
 	parser.set("ref_clk_mhz", mRefClk_MHz);
 
@@ -292,7 +277,6 @@ liblms8_status LMS8001::SaveConfig(const char* filename)
 	parser.save(filename);
 
     return LIBLMS8_SUCCESS;
-*/
 }
 
 /** @brief Returns given parameter value from chip register
@@ -300,6 +284,7 @@ liblms8_status LMS8001::SaveConfig(const char* filename)
     @param fromChip read directly from chip
     @return parameter value
 */
+
 /*
 uint16_t LMS8001::Get_SPI_Reg_bits(const LMS8Parameter &param, bool fromChip)
 {

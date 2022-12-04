@@ -34,6 +34,7 @@ const int ConnectionSPI::cSPI_SPEED_HZ = 2000000;
 */
 bool IsNovenaBoard()
 {
+/*
 #ifdef __unix__
     char data[8];
     int count = 6;
@@ -75,6 +76,7 @@ bool IsNovenaBoard()
 #else
     return false;
 #endif
+*/
 }
 
 /** @brief Initializes SPI port and exports needed GPIO

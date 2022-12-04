@@ -26,6 +26,9 @@
 #include "LimeSuite.h"
 #include <cstdint>
 
+#define LMS8FE_CH1 0
+#define LMS8FE_CH2 1
+
 /// LimeLMS8FE I2C address
 #define LMS8FE_I2C_ADDRESS 0x51
 
@@ -47,7 +50,7 @@
 #define LMS8FE_CID_COUNT 13
 #define LMS8FE_CID_AUTO (-2)
 */
-
+/*
 #define LMS8FE_CID_WB_1000 1
 #define LMS8FE_CID_WB_4000 2
 #define LMS8FE_CID_HAM_0030 3
@@ -66,27 +69,27 @@
 #define LMS8FE_CID_CELL_BAND38 16
 #define LMS8FE_CID_AUTO (-2)
 #define LMS8FE_CID_NOT_SELECTED 100
-
+*/
 /// LimeLMS8FE Ports
-#define LMS8FE_PORT_1 1 ///< Connector J3 - 'TX/RX'
-#define LMS8FE_PORT_2 2 ///< Connector J4 - 'TX'
-#define LMS8FE_PORT_3 3 ///< Connector J5 - '30 MHz TX/RX'
+//#define LMS8FE_PORT_1 1 ///< Connector J3 - 'TX/RX'
+//#define LMS8FE_PORT_2 2 ///< Connector J4 - 'TX'
+//#define LMS8FE_PORT_3 3 ///< Connector J5 - '30 MHz TX/RX'
 
 /// LimeLMS8FE convenience constants for notch on/off control
-#define LMS8FE_NOTCH_OFF 0
-#define LMS8FE_NOTCH_ON 1
+//#define LMS8FE_NOTCH_OFF 0
+//#define LMS8FE_NOTCH_ON 1
 
 /// LimeLMS8FE Modes
-#define LMS8FE_MODE_RX 0   ///< RX - Enabled; TX - Disabled
-#define LMS8FE_MODE_TX 1   ///< RX - Disabled; TX - Enabled
-#define LMS8FE_MODE_NONE 2 ///< RX - Disabled; TX - Disabled
-#define LMS8FE_MODE_TXRX 3 ///< RX - Enabled; TX - Enabled
+//#define LMS8FE_MODE_RX 0   ///< RX - Enabled; TX - Disabled
+//#define LMS8FE_MODE_TX 1   ///< RX - Disabled; TX - Enabled
+//#define LMS8FE_MODE_NONE 2 ///< RX - Disabled; TX - Disabled
+//#define LMS8FE_MODE_TXRX 3 ///< RX - Enabled; TX - Enabled
 
 /// LimeLMS8FE ADC constants
-#define LMS8FE_ADC1 0		///< ADC #1, this ADC value is proportional to output power in dB.
-#define LMS8FE_ADC2 1		///< ADC #2, this ADC value is proportional to reflection coefficient in dB.
-#define LMS8FE_ADC_VREF 5.0 ///< ADC referent voltage
-#define LMS8FE_ADC_BITS 10	///< ADC resolution
+//#define LMS8FE_ADC1 0		///< ADC #1, this ADC value is proportional to output power in dB.
+//#define LMS8FE_ADC2 1		///< ADC #2, this ADC value is proportional to reflection coefficient in dB.
+//#define LMS8FE_ADC_VREF 5.0 ///< ADC referent voltage
+//#define LMS8FE_ADC_BITS 10	///< ADC resolution
 
 /// LimeLMS8FE error codes
 #define LMS8FE_SUCCESS 0
@@ -323,6 +326,7 @@ typedef struct
 	char PA2_CPL_ATT;
 	char TXRX_1;
 	char TXRX_2;
+	char ActiveChannel;
 } lms8fe_boardState;
 
 #ifdef __cplusplus
@@ -406,6 +410,14 @@ extern "C"
 	 */
 	API_EXPORT int CALL_CONV LMS8FE_Reset(lms8fe_dev_t *lms8fe);
 
+//milans 221128
+	API_EXPORT int CALL_CONV LMS8FE_LMS8_Enable(lms8fe_dev_t* lms8fe, int value);
+//milans 221130
+	API_EXPORT int CALL_CONV LMS8FE_Select_Channel(lms8fe_dev_t* lms8fe, int channel);
+//milans 221201
+	API_EXPORT int CALL_CONV LMS8FE_SetState(lms8fe_dev_t* lms8fe, lms8fe_boardState state);
+	API_EXPORT int CALL_CONV LMS8FE_GetState(lms8fe_dev_t* lms8fe, lms8fe_boardState* state);
+
 	/**
 	 *This function configures the LimeLMS8FE board.
 	 *
@@ -422,7 +434,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_Configure(lms8fe_dev_t *lms8fe, char channelIDRX, char channelIDTX, char portRX, char portTX, char mode, char notch, char attenuation, char enableSWR, char sourceSWR);
+	//API_EXPORT int CALL_CONV LMS8FE_Configure(lms8fe_dev_t *lms8fe, char channelIDRX, char channelIDTX, char portRX, char portTX, char mode, char notch, char attenuation, char enableSWR, char sourceSWR);
 
 	/**
 	 *This function configures the LimeLMS8FE board. It's functionality is identical to LMS8FE_Configure, with different arguments.
@@ -432,7 +444,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int LMS8FE_ConfigureState(lms8fe_dev_t *lms8fe, lms8fe_boardState state);
+	//API_EXPORT int LMS8FE_ConfigureState(lms8fe_dev_t *lms8fe, lms8fe_boardState state);
 
 	/**
 	 *This function gets the state of the LimeLMS8FE board. It's functionality is identical to Cmd_GetConfig internal command
@@ -442,7 +454,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int LMS8FE_GetState(lms8fe_dev_t *lms8fe, lms8fe_boardState *state);
+	//API_EXPORT int LMS8FE_GetState(lms8fe_dev_t *lms8fe, lms8fe_boardState *state);
 
 	/**
 	 *This function sets the LimeLMS8FE mode (receive, transmit, both, or none)
@@ -452,7 +464,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_Mode(lms8fe_dev_t *lms8fe, int mode);
+	//API_EXPORT int CALL_CONV LMS8FE_Mode(lms8fe_dev_t *lms8fe, int mode);
 
 	/**
 	 *This function reads the value of the speficied ADC.
@@ -463,7 +475,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_ReadADC(lms8fe_dev_t *lms8fe, int adcID, int *value);
+//	API_EXPORT int CALL_CONV LMS8FE_ReadADC(lms8fe_dev_t *lms8fe, int adcID, int *value);
 
 	/**
 	 *This function configures GPIO pin. Only pins 4 and 5 are configurable.
@@ -474,7 +486,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_ConfGPIO(lms8fe_dev_t *lms8fe, int gpioNum, int direction);
+//	API_EXPORT int CALL_CONV LMS8FE_ConfGPIO(lms8fe_dev_t *lms8fe, int gpioNum, int direction);
 
 	/**
 	 *This function sets the GPIO pin value. GPIO pin should have been previously configured as output using LMS8FE_ConfGPIO function.
@@ -485,7 +497,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_SetGPIO(lms8fe_dev_t *lms8fe, int gpioNum, int val);
+//	API_EXPORT int CALL_CONV LMS8FE_SetGPIO(lms8fe_dev_t *lms8fe, int gpioNum, int val);
 
 	/**
 	 *This function reads the GPIO pin value. GPIO pin should have been previously configured as input using LMS8FE_ConfGPIO function.
@@ -496,7 +508,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_GetGPIO(lms8fe_dev_t *lms8fe, int gpioNum, int *val);
+//	API_EXPORT int CALL_CONV LMS8FE_GetGPIO(lms8fe_dev_t *lms8fe, int gpioNum, int *val);
 
 	/**
 	 * Links LimeLMS8FE Rx and Tx to specific SDR boards channels for automatic band
@@ -509,7 +521,7 @@ extern "C"
 	 *
 	 * @return            0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_AssignSDRChannels(lms8fe_dev_t *lms8fe, int rxChan, int txChan);
+//	API_EXPORT int CALL_CONV LMS8FE_AssignSDRChannels(lms8fe_dev_t *lms8fe, int rxChan, int txChan);
 
 	/**
 	 *This function enables/disables the Lime_LMS8FE fan.
@@ -519,7 +531,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int CALL_CONV LMS8FE_Fan(lms8fe_dev_t *lms8fe, int enable);
+//	API_EXPORT int CALL_CONV LMS8FE_Fan(lms8fe_dev_t *lms8fe, int enable);
 
 	/**
 	 *This function is TEST !!!.
@@ -529,7 +541,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int LMS8FE_Diode(lms8fe_dev_t *lms8fe, int state);
+//	API_EXPORT int LMS8FE_Diode(lms8fe_dev_t *lms8fe, int state);
 
 	/**
 	 *This function is TEST !!!. Control diode on through SPI.
@@ -539,7 +551,7 @@ extern "C"
 	 *
 	 * @return              0 on success, other on failure (see LimeLMS8FE error codes)
 	 */
-	API_EXPORT int LMS8FE_DiodeSPI(lms8fe_dev_t *lms8fe, int state);
+//	API_EXPORT int LMS8FE_DiodeSPI(lms8fe_dev_t *lms8fe, int state);
 
 	/**
 	 *This function is TEST !!! Read or write the register in SC1905 using SPI
@@ -577,7 +589,16 @@ extern "C"
 	 */
 	API_EXPORT int LMS8FE_Get_Config_Full(lms8fe_dev_t *lms8fe, uint8_t *state, int size);
 
+	/**
+	 *This function is TEST !!! Get the LMS8001 device, to be used with LMS8 API functions
+	 *
+	 */
+	extern "C" API_EXPORT int LMS8FE_LMS8_Open(lms8fe_dev_t * lms8fe, lms_device_t * *device);
+
 	/** @} (End LMS8FE_API) */
+
+		// B.J. temprary
+	API_EXPORT int LMS8FE_SPI_write(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t data);
 
 #ifdef __cplusplus
 } // extern "C"

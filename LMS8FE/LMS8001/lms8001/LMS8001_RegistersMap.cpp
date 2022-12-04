@@ -1,5 +1,8 @@
 #include "LMS8001_RegistersMap.h"
-#include "LMS8001_parameters.h"
+#include "../lime/LMS8001_parameters.h"
+
+//milans 221122
+//using namespace lime;
 
 LMS8001_RegistersMap::LMS8001_RegistersMap()
 {

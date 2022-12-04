@@ -22,12 +22,17 @@
 #include <iostream>
  //msavic 151106
 /**/
- #ifndef NDEBUG
- IMPLEMENT_APP_CONSOLE(lms8suiteApp);
- #else
- IMPLEMENT_APP(lms8suiteApp);
- #endif
- 
+ //milans 221122
+//#ifndef NDEBUG
+//IMPLEMENT_APP_CONSOLE(lms8suiteApp);
+//#else
+//IMPLEMENT_APP(lms8suiteApp);
+//#endif
+#if !defined(NDEBUG) & defined(__unix__)
+IMPLEMENT_APP_CONSOLE(lms8suiteApp)
+#else
+IMPLEMENT_APP(lms8suiteApp)
+#endif 
 
  //msavic 151106 {
 /*

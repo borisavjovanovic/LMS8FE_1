@@ -66,6 +66,8 @@ class LMS8FE_wxgui : public LMS8FE_view
 protected:
 	lms_device_t *lmsControl;
 
+	void OnbtnTESTSPI(wxCommandEvent &event); //B.J.
+
 	// Handlers for AppFrame events.
 	void OnbtnOpenPort(wxCommandEvent &event);
 	void OnbtnClosePort(wxCommandEvent &event);

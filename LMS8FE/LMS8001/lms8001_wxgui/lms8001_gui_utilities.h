@@ -4,7 +4,7 @@
 @brief 	Common functions used by all panels
 */
 #include <map>
-#include "LMS8001_parameters.h"
+#include "../lime/LMS8001_parameters.h"
 #include <vector>
 class wxPanel;
 class wxWindow;

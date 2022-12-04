@@ -4,8 +4,8 @@
 #include "lime/lms7_device.h"
 //#include "LimeSuite.h"
 
-#define MADDRESS 1024
-#define MADDRESS2 1024 + 32
+#define MADDRESS 0
+#define MADDRESS2 0 + 32
 /*********************************************************************************************
  * USB Communication
  **********************************************************************************************/
@@ -302,6 +302,26 @@ int Lms8fe_read_buffer_fd(LMS8FE_COM com, unsigned char *data, int size)
 }
 
 //******* Command Definitions *******
+#define sbi(p, n) ((p) |= (1UL << (n)))
+#define cbi(p, n) ((p) &= ~(1 << (n)))
+
+void setStateBit(uint8_t* state, int byte, int bit, int value)
+{
+	if (value == 0)
+		cbi(state[byte], bit);
+	else
+		sbi(state[byte], bit);
+}
+
+int getStateBit(uint8_t* state, int byte, int bit)
+{
+	int result;
+
+	result = (state[byte] >> bit) & 0x01;
+
+	return result;
+}
+
 int Lms8fe_Cmd_GetInfo(lms_device_t *dev, LMS8FE_COM com, Lms8fe_boardInfo *info)
 {
 	unsigned char buf[LMS8FE_BUFFER_SIZE];
@@ -432,19 +452,88 @@ int Lms8fe_SaveConfig(const char *filename, lms8fe_boardState state)
 	return 0;
 }
 
-int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState *state)
+//milans 221201
+//ovdi!!!
+int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState * boardState)
 {
 	unsigned char buf[LMS8FE_BUFFER_SIZE];
 	int len;
 
 	memset(buf, 0, LMS8FE_BUFFER_SIZE);
+	
+	int result = Lms8fe_Cmd_Get_Config_Full(dev, com, buf, LMS8FE_BUFFER_SIZE);
 
+/*
 	buf[0] = LMS8FE_CMD_GET_CONFIG;
 	if (Lms8fe_write_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE) != 0)
 		return LMS8FE_ERROR_COMM;
 	len = Lms8fe_read_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE);
 	if (len == -1)
 		return (LMS8FE_ERROR_COMM);
+*/
+	uint8_t* state = buf;
+
+//	uint8_t state[STATE_SIZE];
+//	memset(state, 0, STATE_SIZE);
+//	int getStateBit(uint8_t * state, int byte, int bit)
+
+	boardState->SPI_2_MCU_DIR_OUT_in = getStateBit(state, SPI_2_MCU_DIR_OUT_in_BYTE, SPI_2_MCU_DIR_OUT_in_BIT);
+	boardState->LMS8001_1_SSENn = getStateBit(state, LMS8001_1_SSENn_BYTE, LMS8001_1_SSENn_BIT);
+	boardState->LMS8001_2_SSENn = getStateBit(state, LMS8001_2_SSENn_BYTE, LMS8001_2_SSENn_BIT);
+	boardState->EXT_PLL_SSENn = getStateBit(state, EXT_PLL_SSENn_BYTE, EXT_PLL_SSENn_BIT);
+	boardState->LMS8001_1_RESETn = getStateBit(state, LMS8001_1_RESETn_BYTE, LMS8001_1_RESETn_BIT);
+	boardState->LMS8001_2_RESETn = getStateBit(state, LMS8001_2_RESETn_BYTE, LMS8001_2_RESETn_BIT);
+	boardState->SC1905_1_SSENn = getStateBit(state, SC1905_1_SSENn_BYTE, SC1905_1_SSENn_BIT);
+	boardState->SC1905_2_SSENn = getStateBit(state, SC1905_2_SSENn_BYTE, SC1905_2_SSENn_BIT);
+	boardState->GPIO_SEL_A_LMS8001 = getStateBit(state, GPIO_SEL_A_LMS8001_BYTE, GPIO_SEL_A_LMS8001_BIT);
+	boardState->SC1905_1_RESETn = getStateBit(state, SC1905_1_RESETn_BYTE, SC1905_1_RESETn_BIT);
+	boardState->SC1905_2_RESETn = getStateBit(state, SC1905_2_RESETn_BYTE, SC1905_2_RESETn_BIT);
+	boardState->BP_AMP1 = getStateBit(state, BYPASS_AMP1_BYTE, BYPASS_AMP1_BIT);
+	boardState->SD_AMP1 = getStateBit(state, DISABLE_AMP1_BYTE, DISABLE_AMP1_BIT);
+	boardState->BP_AMP2 = getStateBit(state, BYPASS_AMP2_BYTE, BYPASS_AMP2_BIT);
+	boardState->SD_AMP2 = getStateBit(state, DISABLE_AMP2_BYTE, DISABLE_AMP2_BIT);
+	boardState->PA1_A_EN = getStateBit(state, PA1_A_EN_BYTE, PA1_A_EN_BIT);
+	boardState->PA1_B_EN = getStateBit(state, PA1_B_EN_BYTE, PA1_B_EN_BIT);
+	boardState->PA2_A_EN = getStateBit(state, PA2_A_EN_BYTE, PA2_A_EN_BIT);
+	boardState->PA2_B_EN = getStateBit(state, PA2_B_EN_BYTE, PA2_B_EN_BIT);
+	boardState->LNA1_EN = getStateBit(state, LNA1_EN_BYTE, LNA1_EN_BIT);
+	boardState->LNA2_EN = getStateBit(state, LNA2_EN_BYTE, LNA2_EN_BIT);
+	boardState->DA1_EN = getStateBit(state, DA1_EN_BYTE, DA1_EN_BIT);
+	boardState->DA2_EN = getStateBit(state, DA2_EN_BYTE, DA2_EN_BIT);
+	boardState->PA1_A_B_CTRL = getStateBit(state, PA1_A_B_CTRL_BYTE, PA1_A_B_CTRL_BIT);
+	boardState->PA2_A_B_CTRL = getStateBit(state, PA2_A_B_CTRL_BYTE, PA2_A_B_CTRL_BIT);
+
+	boardState->PA1_CPL_ATT =
+		pow(2, 0) * getStateBit(state, PA1_CPL_D0_BYTE, PA1_CPL_D0_BIT) +
+		pow(2, 1) * getStateBit(state, PA1_CPL_D1_BYTE, PA1_CPL_D1_BIT) +
+		pow(2, 2) * getStateBit(state, PA1_CPL_D2_BYTE, PA1_CPL_D2_BIT) +
+		pow(2, 3) * getStateBit(state, PA1_CPL_D3_BYTE, PA1_CPL_D3_BIT) +
+		pow(2, 4) * getStateBit(state, PA1_CPL_D4_BYTE, PA1_CPL_D4_BIT) +
+		pow(2, 5) * getStateBit(state, PA1_CPL_D5_BYTE, PA1_CPL_D5_BIT) +
+		pow(2, 6) * getStateBit(state, PA1_CPL_D6_BYTE, PA1_CPL_D6_BIT);
+
+	boardState->PA2_CPL_ATT =
+		pow(2, 0) * getStateBit(state, PA2_CPL_D0_BYTE, PA2_CPL_D0_BIT) +
+		pow(2, 1) * getStateBit(state, PA2_CPL_D1_BYTE, PA2_CPL_D1_BIT) +
+		pow(2, 2) * getStateBit(state, PA2_CPL_D2_BYTE, PA2_CPL_D2_BIT) +
+		pow(2, 3) * getStateBit(state, PA2_CPL_D3_BYTE, PA2_CPL_D3_BIT) +
+		pow(2, 4) * getStateBit(state, PA2_CPL_D4_BYTE, PA2_CPL_D4_BIT) +
+		pow(2, 5) * getStateBit(state, PA2_CPL_D5_BYTE, PA2_CPL_D5_BIT) +
+		pow(2, 6) * getStateBit(state, PA2_CPL_D6_BYTE, PA2_CPL_D6_BIT);
+
+	boardState->TXRX_1 = getStateBit(state, MCU_BYTE, MCU_TXRX_1_BIT);
+	boardState->TXRX_2 = getStateBit(state, MCU_BYTE, MCU_TXRX_2_BIT);
+
+	boardState->ActiveChannel = getStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT);
+
+	//	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, cmbChannel->GetSelection());
+
+	//	int result = LMS8FE_Set_Config_Full(lms8fe, state, STATE_SIZE);
+//	return Lms8fe_Cmd_Set_Config_Full(dev, com, state, STATE_SIZE);
+	//	if (result != LMS8FE_SUCCESS) {
+	//		PrintError(result);
+	//		return;
+	//	}
 	/*
 		state->channelIDRX = buf[1];
 		state->channelIDTX = buf[2];
@@ -460,7 +549,7 @@ int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState *s
 		state->enableSWR = buf[8];
 		state->sourceSWR = buf[9];
 	*/
-	return 0;
+	return result;
 }
 
 void Lms8fe_mySleep(int sleepms)
@@ -540,32 +629,54 @@ int Lms8fe_Cmd_Reset(lms_device_t *dev, LMS8FE_COM com)
 	return result;
 }
 
+//milans 221128
+int Lms8fe_Cmd_lms8_Enable(lms_device_t* dev, LMS8FE_COM com, uint8_t value)
+{
+	int result = 0;
+	unsigned char buf[LMS8FE_BUFFER_SIZE];
+	int len;
+
+	memset(buf, 0, LMS8FE_BUFFER_SIZE);
+
+	buf[0] = LMS8FE_CMD_LMS8_ENABLE;
+	buf[1] = value;
+
+	if (Lms8fe_write_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE) != 0)
+		return LMS8FE_ERROR_COMM;
+	len = Lms8fe_read_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE);
+	if (len == -1)
+		return (LMS8FE_ERROR_COMM);
+
+	return result;
+}
+
+//milans 221130
+int Lms8fe_Cmd_Select_Channel(lms_device_t* dev, LMS8FE_COM com, uint8_t channel)
+{
+	int result = 0;
+	unsigned char buf[LMS8FE_BUFFER_SIZE];
+	int len;
+
+	memset(buf, 0, LMS8FE_BUFFER_SIZE);
+
+	buf[0] = LMS8FE_CMD_SELECT_CHANNEL;
+	buf[1] = channel;
+
+	if (Lms8fe_write_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE) != 0)
+		return LMS8FE_ERROR_COMM;
+	len = Lms8fe_read_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE);
+	if (len == -1)
+		return (LMS8FE_ERROR_COMM);
+
+	return result;
+}
+
 /*
 int Lms8fe_Cmd_ConfigureState(lms_device_t* dev, LMS8FE_COM com, lms8fe_boardState state)
 {
 	return Lms8fe_Cmd_Configure(dev, com, state.channelIDRX, state.channelIDTX, state.selPortRX, state.selPortTX, state.mode, state.notchOnOff, state.attValue, state.enableSWR, state.sourceSWR);
 }
 */
-
-#define sbi(p, n) ((p) |= (1UL << (n)))
-#define cbi(p, n) ((p) &= ~(1 << (n)))
-
-void setStateBit(uint8_t *state, int byte, int bit, int value)
-{
-	if (value == 0)
-		cbi(state[byte], bit);
-	else
-		sbi(state[byte], bit);
-}
-
-int getStateBit(uint8_t *state, int byte, int bit)
-{
-	int result;
-
-	result = (state[byte] >> bit) & 0x01;
-
-	return result;
-}
 
 int Lms8fe_Cmd_Configure(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState boardState)
 {
@@ -642,7 +753,9 @@ int Lms8fe_Cmd_Configure(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState bo
 	setStateBit(state, MCU_BYTE, MCU_TXRX_1_BIT, boardState.TXRX_1);
 	setStateBit(state, MCU_BYTE, MCU_TXRX_2_BIT, boardState.TXRX_2);
 
-	//	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, cmbChannel->GetSelection());
+//milans 221201
+//	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, cmbChannel->GetSelection());
+	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, boardState.ActiveChannel);
 
 	//	int result = LMS8FE_Set_Config_Full(lms8fe, state, STATE_SIZE);
 	return Lms8fe_Cmd_Set_Config_Full(dev, com, state, STATE_SIZE);
@@ -691,7 +804,7 @@ int Lms8fe_Cmd_Configure(lms_device_t *dev, LMS8FE_COM com, int channelIDRX, int
 	result = buf[1]; // buf[0] is the command, buf[1] is the result
 	return result;
 }
-*/
+
 
 int Lms8fe_Cmd_Mode(lms_device_t *dev, LMS8FE_COM com, int mode)
 {
@@ -826,11 +939,11 @@ int Lms8fe_Cmd_GetGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int *val)
 
 	return result;
 }
-
+*/
 /******************************************************************************
  * I2C Communications
  *******************************************************************************/
-
+/*
 void Lms8fe_mySleep(double sleepms)
 {
 #ifdef __unix__
@@ -849,7 +962,6 @@ void Lms8fe_i2c_dly(void)
 
 int Lms8fe_i2c_setVal(lms_device_t *lms, int bitGPIO, int value)
 {
-	/*
 		uint8_t gpio_dir = 0;
 		int direction;
 		if (LMS_GPIODirRead(lms, &gpio_dir, 1) != 0)
@@ -874,13 +986,11 @@ int Lms8fe_i2c_setVal(lms_device_t *lms, int bitGPIO, int value)
 			return -1;
 
 		Lms8fe_i2c_dly();
-	*/
 	return 0;
 }
 
 int Lms8fe_i2c_getVal(lms_device_t *lms, int bitGPIO)
 {
-	/*
 		uint8_t gpio_val = 0;
 		if (LMS_GPIORead(lms, &gpio_val, 1) != 0)
 			return -1;
@@ -890,9 +1000,6 @@ int Lms8fe_i2c_getVal(lms_device_t *lms, int bitGPIO)
 		result = gpio_val & (1 << (bitGPIO));
 
 		return result;
-	*/
-
-	return 0;
 }
 
 int Lms8fe_i2c_start(lms_device_t *lms)
@@ -1084,6 +1191,7 @@ int Lms8fe_Cmd_DiodeSPI(lms_device_t *dev, LMS8FE_COM com, int state)
 	//	result = buf[1]; // buf[0] is the command, buf[1] is the result
 	return result;
 }
+*/
 
 int Lms8fe_Cmd_SC1905_SPI_Message_Memory(lms_device_t *dev, LMS8FE_COM com, uint16_t address, uint8_t *val, bool isRead, int bytesNo, bool isEEPROM)
 {
@@ -1299,23 +1407,22 @@ int Lms8fe_Cmd_Get_Config_Full(lms_device_t *dev, LMS8FE_COM com, uint8_t *state
 }
 
 // B.J.
-// temporary, to be tested
-
-int SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data)
+// to be tested
+int Lms8fe_SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data)
 {
 	uint16_t addr = address + maddress;
 	int ret = 0;
-	if (LMS_WriteFPGAReg(lms, addr, data) != 0)
+	if (LMS_WriteEXTBRDReg(lms, addr, data) != 0)
 		ret = -1;
 	return ret;
 }
 
-int SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t *data)
+int Lms8fe_SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t *data)
 {
 	uint16_t addr = address + maddress;
 	int ret = 0;
 	uint16_t regValue = 0x0000;
-	LMS_ReadFPGAReg(lms, addr, &regValue);
+	LMS_ReadEXTBRDReg(lms, addr, &regValue);
 	*data = regValue;
 	return ret;
 }
@@ -1333,21 +1440,21 @@ int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size)
 		data = (uint16_t)(c[2 * i + 1]);
 		data = data << 8;
 		data += (uint16_t)(c[2 * i]);
-		SPI_write(lms, maddress, i, data);
+		Lms8fe_SPI_write(lms, maddress, i, data);
 	}
-	SPI_write(lms, maddress2, 0, 0x0001); // start the Do_command()
+	Lms8fe_SPI_write(lms, maddress2, 0, 0x0001); // start the Do_command()
 	return 0;
 }
 
 int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
 {
 	uint16_t maddress = MADDRESS;
-	uint16_t maddress2 = MADDRESS2;
+	//uint16_t maddress2 = MADDRESS2;
 	uint16_t data = 0;
 
 	for (int i = 0; i < size / 2; i++)
 	{
-		SPI_read(lms, maddress, i, &data);
+		Lms8fe_SPI_read(lms, maddress, i, &data);
 		c[2 * i + 1] = (uint8_t)(data >> 8);
 		c[2 * i] = (uint8_t)(data & 0x00FF);
 	}

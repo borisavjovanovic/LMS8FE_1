@@ -4,6 +4,8 @@
 #include <cstdint>
 // milans 220420
 // #include "Logger.h"
+#include "./LMS8001/API/lms8_device.h"
+#include "./LMS8001/lms8001/lmsComms.h"
 
 #define SERIAL_BAUDRATE 9600
 // #define SERIAL_BAUDRATE 115200
@@ -97,6 +99,24 @@ extern "C" API_EXPORT int LMS8FE_Reset(lms8fe_dev_t *lms8fe)
     return result;
 }
 
+//milans 221128
+extern "C" API_EXPORT int LMS8FE_LMS8_Enable(lms8fe_dev_t * lms8fe, int value)
+{
+    int result = 0;
+
+    if (!lms8fe)
+        return -1;
+    auto* dev = static_cast<LMS8FE_Device*>(lms8fe);
+
+    result = Lms8fe_Cmd_lms8_Enable(dev->sdrDevice, dev->com, value);
+
+    //        if (result == 0)
+    //            dev->UpdateState();
+
+    return result;
+}
+
+/*
 extern "C" API_EXPORT int LMS8FE_Configure(lms8fe_dev_t *lms8fe, char channelIDRX, char channelIDTX, char portRX, char portTX, char mode, char notch, char attenuation, char enableSWR, char sourceSWR)
 {
     lms8fe_boardState state = {channelIDRX, channelIDTX, portRX, portTX, mode, notch, attenuation, enableSWR, sourceSWR};
@@ -106,7 +126,6 @@ extern "C" API_EXPORT int LMS8FE_Configure(lms8fe_dev_t *lms8fe, char channelIDR
 extern "C" API_EXPORT int LMS8FE_ConfigureState(lms8fe_dev_t *lms8fe, lms8fe_boardState state)
 {
     int result = 0;
-    /*
             if (!lms8fe)
                 return -1;
             auto* dev = static_cast<LMS8FE_Device*>(lms8fe);
@@ -117,10 +136,39 @@ extern "C" API_EXPORT int LMS8FE_ConfigureState(lms8fe_dev_t *lms8fe, lms8fe_boa
 
             if (result == 0)
     //            dev->UpdateState(state);
-    */
+    return result;
+}
+*/
+// milans 221201
+// This function may be useful... Implement it!
+// Maybe there should be LMS8FE_GetState, and LMS8FE_SetState...
+extern "C" API_EXPORT int LMS8FE_SetState(lms8fe_dev_t * lms8fe, lms8fe_boardState state)
+{
+    int result = 0;
+
+    if (!lms8fe)
+        return -1;
+    auto* dev = static_cast<LMS8FE_Device*>(lms8fe);
+
+    result = Lms8fe_Cmd_Configure(dev->sdrDevice, dev->com, state);
+
     return result;
 }
 
+extern "C" API_EXPORT int LMS8FE_GetState(lms8fe_dev_t * lms8fe, lms8fe_boardState* state)
+{
+    int result = 0;
+
+    if (!lms8fe)
+        return -1;
+    auto* dev = static_cast<LMS8FE_Device*>(lms8fe);
+
+    result = Lms8fe_Cmd_GetConfig(dev->sdrDevice, dev->com, state);
+
+    return result;
+}
+
+/*
 extern "C" API_EXPORT int LMS8FE_GetState(lms8fe_dev_t *lms8fe, lms8fe_boardState *state)
 {
     int result = 0;
@@ -133,7 +181,8 @@ extern "C" API_EXPORT int LMS8FE_GetState(lms8fe_dev_t *lms8fe, lms8fe_boardStat
 
     return result;
 }
-
+*/
+/*
 extern "C" API_EXPORT int LMS8FE_Mode(lms8fe_dev_t *lms8fe, int mode)
 {
     int result = 0;
@@ -220,7 +269,7 @@ extern "C" API_EXPORT int LMS8FE_DiodeSPI(lms8fe_dev_t *lms8fe, int state)
 
     return Lms8fe_Cmd_DiodeSPI(dev->sdrDevice, dev->com, state);
 }
-
+*/
 extern "C" API_EXPORT int LMS8FE_SC1905_SPI_Message_Memory(lms8fe_dev_t *lms8fe, uint16_t address, uint8_t *val, bool isRead, int bytesNo, bool isEEPROM)
 {
     if (!lms8fe)
@@ -273,4 +322,58 @@ extern "C" API_EXPORT int LMS8FE_Get_Config_Full(lms8fe_dev_t *lms8fe, uint8_t *
     auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
 
     return Lms8fe_Cmd_Get_Config_Full(dev->sdrDevice, dev->com, state, size);
+}
+
+extern "C" API_EXPORT int LMS8FE_LMS8_Open(lms8fe_dev_t * lms8fe, lms_device_t * *device)
+{
+    if (device == nullptr)
+    {
+//        lime::error("Device pointer cannot be NULL");
+        return -1;
+    }
+
+    auto dev = LMS8_Device::CreateDevice();
+    if (dev == nullptr)
+    {
+//        lime::error("Unable to open device");
+        return -1;
+    }
+    *device = dev;
+
+    LMScomms* lms8controlPort = dev->GetConnection();
+
+    LMS8FE_COM com = ((LMS8FE_Device*)lms8fe)->com;
+
+    lms8controlPort->InheritCOM(com.hComm);
+    lms8controlPort->lms8fe_do_mask = true;
+    lms8controlPort->lms8fe_cmd_mask = 0x80;
+
+    return LMS_SUCCESS;
+}
+
+//milans 221130
+extern "C" API_EXPORT int LMS8FE_Select_Channel(lms8fe_dev_t * lms8fe, int channel)
+{
+    int result = 0;
+
+    if (!lms8fe)
+        return -1;
+    auto* dev = static_cast<LMS8FE_Device*>(lms8fe);
+
+    result = Lms8fe_Cmd_Select_Channel(dev->sdrDevice, dev->com, channel);
+
+    //        if (result == 0)
+    //            dev->UpdateState();
+
+    return result;
+}
+// B.J.
+// only for testing
+// temporary
+extern "C" API_EXPORT int LMS8FE_SPI_write(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t data)
+{
+    if (!lms8fe)
+        return -1;
+    auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
+    return Lms8fe_SPI_write(dev->sdrDevice, maddress, address, data);
 }

@@ -1,3 +1,4 @@
+set (CMAKE_CXX_STANDARD 11)
 cmake_minimum_required(VERSION 3.1.3)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE TYPE INTERNAL FORCE)
 project (LMS8FE)

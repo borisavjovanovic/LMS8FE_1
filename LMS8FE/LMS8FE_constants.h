@@ -79,19 +79,22 @@ typedef struct LMS8FE_COM
 #define LMS8FE_CMD_SET_CONFIG_FULL 0x12
 #define LMS8FE_CMD_GET_CONFIG_FULL 0x13
 // milans 220714
-#define LMS8FE_CMD_RESET 0x14
+#define LMS8FE_CMD_RESET           0x14
+//milans 221128
+#define LMS8FE_CMD_LMS8_ENABLE     0x15
+#define LMS8FE_CMD_SELECT_CHANNEL  0x16
 
 // #define LMS8FE_CMD_RESET                   0xe2
-#define LMS8FE_CMD_GET_CONFIG 0xe3
+//#define LMS8FE_CMD_GET_CONFIG 0xe3
 // #define LMS8FE_CMD_GET_CONFIG_FULL         0xe4
-#define LMS8FE_CMD_I2C_MASTER 0xe5
+//#define LMS8FE_CMD_I2C_MASTER 0xe5
 
 // milans 220429
 // #define LMS8FE_CMD_DIODE                   0xf1
-#define LMS8FE_CMD_DIODE 0x71
+//#define LMS8FE_CMD_DIODE 0x71
 // milans 220506
 // #define LMS8FE_CMD_DIODESPI                0xf2
-#define LMS8FE_CMD_DIODESPI 0x72
+//#define LMS8FE_CMD_DIODESPI 0x72
 
 // SC1905 Control
 // #define LMS8FE_CMD_SC1905_SPI_MESSAGE_MEMORY  0x91
@@ -209,21 +212,25 @@ extern "C"
 	int Lms8fe_Cmd_Hello(LMS8FE_COM com);
 	int Lms8fe_Cmd_LoadConfig(lms_device_t *dev, LMS8FE_COM com, const char *filename);
 	int Lms8fe_Cmd_Reset(lms_device_t *dev, LMS8FE_COM com);
+//milans 221128
+	int Lms8fe_Cmd_lms8_Enable(lms_device_t* dev, LMS8FE_COM com, uint8_t value);
+//milans 221130
+	int Lms8fe_Cmd_Select_Channel(lms_device_t* dev, LMS8FE_COM com, uint8_t channel);
 	//	int Lms8fe_Cmd_ConfigureState(lms_device_t* dev, LMS8FE_COM com, lms8fe_boardState state);
 	//	int Lms8fe_Cmd_Configure(lms_device_t *dev, LMS8FE_COM com, int channelIDRX, int channelIDTX = -1, int selPortRX = 0, int selPortTX = 0, int mode = 0, int notch = 0, int attenuation = 0, int enableSWR = 0, int sourceSWR = 0);
 	int Lms8fe_Cmd_Configure(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState state);
-	int Lms8fe_Cmd_Mode(lms_device_t *dev, LMS8FE_COM com, int mode);
-	int Lms8fe_Cmd_ReadADC(lms_device_t *dev, LMS8FE_COM com, int adcID, int *value);
-	int Lms8fe_Cmd_Cmd(lms_device_t *dev, LMS8FE_COM com, unsigned char *buf);
-	int Lms8fe_Cmd_ConfGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int direction);
-	int Lms8fe_Cmd_SetGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int val);
-	int Lms8fe_Cmd_GetGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int *val);
-	int Lms8fe_Cmd_Fan(lms_device_t *dev, LMS8FE_COM com, int enable);
+//	int Lms8fe_Cmd_Mode(lms_device_t *dev, LMS8FE_COM com, int mode);
+//	int Lms8fe_Cmd_ReadADC(lms_device_t *dev, LMS8FE_COM com, int adcID, int *value);
+//	int Lms8fe_Cmd_Cmd(lms_device_t *dev, LMS8FE_COM com, unsigned char *buf);
+//	int Lms8fe_Cmd_ConfGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int direction);
+//	int Lms8fe_Cmd_SetGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int val);
+//	int Lms8fe_Cmd_GetGPIO(lms_device_t *dev, LMS8FE_COM com, int gpioNum, int *val);
+//	int Lms8fe_Cmd_Fan(lms_device_t *dev, LMS8FE_COM com, int enable);
 
 	// milans 220429
-	int Lms8fe_Cmd_Diode(lms_device_t *dev, LMS8FE_COM com, int state);
+//	int Lms8fe_Cmd_Diode(lms_device_t *dev, LMS8FE_COM com, int state);
 	// milans 220506
-	int Lms8fe_Cmd_DiodeSPI(lms_device_t *dev, LMS8FE_COM com, int state);
+//	int Lms8fe_Cmd_DiodeSPI(lms_device_t *dev, LMS8FE_COM com, int state);
 	// milans 220520
 	int Lms8fe_Cmd_SC1905_SPI_Message_Memory(lms_device_t *dev, LMS8FE_COM com, uint16_t address, uint8_t *val, bool isRead, int bytesNo, bool isEEPROM = false);
 	// milans 220526
@@ -247,6 +254,7 @@ extern "C"
 	/************************************************************************
 	 * I2C Functions
 	 *************************************************************************/
+/*
 	void Lms8fe_mySleep(double sleepms);
 	void Lms8fe_i2c_dly(void);
 	int Lms8fe_i2c_setVal(lms_device_t *lms, int bitGPIO, int value);
@@ -257,6 +265,9 @@ extern "C"
 	int Lms8fe_i2c_tx(lms_device_t *lms, unsigned char d);
 	int Lms8fe_i2c_write_buffer(lms_device_t *lms, unsigned char *c, int size);
 	int Lms8fe_i2c_read_buffer(lms_device_t *lms, unsigned char *c, int size);
+*/
+//B.J.
+int Lms8fe_SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data);
 
 #if __cplusplus
 }

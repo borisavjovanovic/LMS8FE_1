@@ -679,8 +679,8 @@ void LMS8FE_wxgui::OnbtnClearMessages(wxCommandEvent &event)
 {
 	txtMessageField->Clear();
 }
-
-void LMS8FE_wxgui::OntbtnDiode(wxCommandEvent &event)
+/*
+void LMS8FE_wxgui::OntbtnDiode(wxCommandEvent& event)
 {
 	int state = tbtnDiode->GetValue();
 	//	int state = 1;
@@ -703,7 +703,7 @@ void LMS8FE_wxgui::OntbtnDiodeSPI(wxCommandEvent &event)
 		return;
 	}
 }
-
+*/
 void LMS8FE_wxgui::OnbtnSC1905_Read_FW_Version(wxCommandEvent &event)
 {
 	uint16_t address = 0x003;
@@ -2069,7 +2069,9 @@ void LMS8FE_wxgui::OnmiLMS8001(wxCommandEvent &event)
 		//		lms8001GUI = new LMS8SuiteAppFrame(this, wxNewId(), _("LMS8001"));
 		lms8001GUI = new LMS8SuiteAppFrame(this);
 
-		if (dev->com.hComm > -1) { // B.J. added check
+		//milans 221125 - added (int)
+		if (((int)dev->com.hComm) > -1) { // B.J. added check
+		//		if (dev->com.hComm > -1) { // B.J. added check
 
 			lms8001GUI->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(LMS8FE_wxgui::OnLMS8001Close), NULL, this);
 			// milans 220610
@@ -2432,3 +2434,15 @@ void LMS8FE_wxgui::Detailed2Simple()
 		break;
 	}
 }
+
+
+// B.J.
+// temporary
+void LMS8FE_wxgui::OnbtnTESTSPI(wxCommandEvent &event)
+{
+	LMS8FE_SPI_write(lms8fe, 0, 0, 0xAAAA);
+        char mssg[200];
+	sprintf(mssg, "State");
+	AddMssg(mssg);
+}
+
