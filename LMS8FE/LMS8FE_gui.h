@@ -50,8 +50,11 @@ protected:
 	wxPanel *m_panel15;
 	wxRadioButton *rbI2C;
 	wxRadioButton *rbUSB;
-
-    wxButton *btnTESTSPI; // B.J.
+    
+    wxButton *btnREADSPI; // B.J.
+	wxButton *btnWRITESPI; // B.J.
+	wxTextCtrl* txtCtrlADDRSPI; 
+	wxTextCtrl* txtCtrlDATASPI;
 
 	wxPanel *m_panel161;
 	wxComboBox *cmbbPorts;
@@ -265,7 +268,8 @@ protected:
 	virtual void OnGridCellChangegridSC1905_EEPROM_Parameters(wxGridEvent &event) { event.Skip(); }
 	virtual void OnbtnClearMessages(wxCommandEvent &event) { event.Skip(); }
 
-	virtual void OnbtnTESTSPI(wxCommandEvent &event) { event.Skip(); }  // B.J.
+	virtual void OnbtnREADSPI(wxCommandEvent &event) { event.Skip(); }  // B.J.
+	virtual void OnbtnWRITESPI(wxCommandEvent &event) { event.Skip(); }  // B.J.
 
 public:
 	LMS8FE_view(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString &title = wxT("LMS8FE Control"), const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxSize(-1, -1), long style = wxCAPTION | wxCLOSE_BOX | wxMINIMIZE_BOX | wxSYSTEM_MENU | wxTAB_TRAVERSAL);

@@ -2,7 +2,7 @@
 #include "INI.h"
 #include <chrono>
 #include "lime/lms7_device.h"
-//#include "LimeSuite.h"
+// #include "LimeSuite.h"
 
 #define MADDRESS 0
 #define MADDRESS2 0 + 32
@@ -239,10 +239,8 @@ int Lms8fe_serialport_close(LMS8FE_COM com)
 	return result;
 }
 
-
 int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size);
 int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size);
-
 
 int Lms8fe_write_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, int size)
 {
@@ -279,7 +277,7 @@ int Lms8fe_read_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, i
 	else if (dev != NULL)
 	{
 		// B.J.
-		//return Lms8fe_i2c_read_buffer(dev, data, size);
+		// return Lms8fe_i2c_read_buffer(dev, data, size);
 		return Lms8fe_spi_read_buffer(dev, data, size);
 	}
 	return -1; // error: both dev and fd are invalid
@@ -305,7 +303,7 @@ int Lms8fe_read_buffer_fd(LMS8FE_COM com, unsigned char *data, int size)
 #define sbi(p, n) ((p) |= (1UL << (n)))
 #define cbi(p, n) ((p) &= ~(1 << (n)))
 
-void setStateBit(uint8_t* state, int byte, int bit, int value)
+void setStateBit(uint8_t *state, int byte, int bit, int value)
 {
 	if (value == 0)
 		cbi(state[byte], bit);
@@ -313,7 +311,7 @@ void setStateBit(uint8_t* state, int byte, int bit, int value)
 		sbi(state[byte], bit);
 }
 
-int getStateBit(uint8_t* state, int byte, int bit)
+int getStateBit(uint8_t *state, int byte, int bit)
 {
 	int result;
 
@@ -452,30 +450,30 @@ int Lms8fe_SaveConfig(const char *filename, lms8fe_boardState state)
 	return 0;
 }
 
-//milans 221201
-//ovdi!!!
-int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState * boardState)
+// milans 221201
+// ovdi!!!
+int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState *boardState)
 {
 	unsigned char buf[LMS8FE_BUFFER_SIZE];
 	int len;
 
 	memset(buf, 0, LMS8FE_BUFFER_SIZE);
-	
+
 	int result = Lms8fe_Cmd_Get_Config_Full(dev, com, buf, LMS8FE_BUFFER_SIZE);
 
-/*
-	buf[0] = LMS8FE_CMD_GET_CONFIG;
-	if (Lms8fe_write_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE) != 0)
-		return LMS8FE_ERROR_COMM;
-	len = Lms8fe_read_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE);
-	if (len == -1)
-		return (LMS8FE_ERROR_COMM);
-*/
-	uint8_t* state = buf;
+	/*
+		buf[0] = LMS8FE_CMD_GET_CONFIG;
+		if (Lms8fe_write_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE) != 0)
+			return LMS8FE_ERROR_COMM;
+		len = Lms8fe_read_buffer(dev, com, buf, LMS8FE_BUFFER_SIZE);
+		if (len == -1)
+			return (LMS8FE_ERROR_COMM);
+	*/
+	uint8_t *state = buf;
 
-//	uint8_t state[STATE_SIZE];
-//	memset(state, 0, STATE_SIZE);
-//	int getStateBit(uint8_t * state, int byte, int bit)
+	//	uint8_t state[STATE_SIZE];
+	//	memset(state, 0, STATE_SIZE);
+	//	int getStateBit(uint8_t * state, int byte, int bit)
 
 	boardState->SPI_2_MCU_DIR_OUT_in = getStateBit(state, SPI_2_MCU_DIR_OUT_in_BYTE, SPI_2_MCU_DIR_OUT_in_BIT);
 	boardState->LMS8001_1_SSENn = getStateBit(state, LMS8001_1_SSENn_BYTE, LMS8001_1_SSENn_BIT);
@@ -529,7 +527,7 @@ int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState * 
 	//	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, cmbChannel->GetSelection());
 
 	//	int result = LMS8FE_Set_Config_Full(lms8fe, state, STATE_SIZE);
-//	return Lms8fe_Cmd_Set_Config_Full(dev, com, state, STATE_SIZE);
+	//	return Lms8fe_Cmd_Set_Config_Full(dev, com, state, STATE_SIZE);
 	//	if (result != LMS8FE_SUCCESS) {
 	//		PrintError(result);
 	//		return;
@@ -629,8 +627,8 @@ int Lms8fe_Cmd_Reset(lms_device_t *dev, LMS8FE_COM com)
 	return result;
 }
 
-//milans 221128
-int Lms8fe_Cmd_lms8_Enable(lms_device_t* dev, LMS8FE_COM com, uint8_t value)
+// milans 221128
+int Lms8fe_Cmd_lms8_Enable(lms_device_t *dev, LMS8FE_COM com, uint8_t value)
 {
 	int result = 0;
 	unsigned char buf[LMS8FE_BUFFER_SIZE];
@@ -650,8 +648,8 @@ int Lms8fe_Cmd_lms8_Enable(lms_device_t* dev, LMS8FE_COM com, uint8_t value)
 	return result;
 }
 
-//milans 221130
-int Lms8fe_Cmd_Select_Channel(lms_device_t* dev, LMS8FE_COM com, uint8_t channel)
+// milans 221130
+int Lms8fe_Cmd_Select_Channel(lms_device_t *dev, LMS8FE_COM com, uint8_t channel)
 {
 	int result = 0;
 	unsigned char buf[LMS8FE_BUFFER_SIZE];
@@ -753,8 +751,8 @@ int Lms8fe_Cmd_Configure(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState bo
 	setStateBit(state, MCU_BYTE, MCU_TXRX_1_BIT, boardState.TXRX_1);
 	setStateBit(state, MCU_BYTE, MCU_TXRX_2_BIT, boardState.TXRX_2);
 
-//milans 221201
-//	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, cmbChannel->GetSelection());
+	// milans 221201
+	//	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, cmbChannel->GetSelection());
 	setStateBit(state, MISC_BYTE, MISC_CHANNEL_BIT, boardState.ActiveChannel);
 
 	//	int result = LMS8FE_Set_Config_Full(lms8fe, state, STATE_SIZE);
@@ -1407,7 +1405,6 @@ int Lms8fe_Cmd_Get_Config_Full(lms_device_t *dev, LMS8FE_COM com, uint8_t *state
 }
 
 // B.J.
-// to be tested
 int Lms8fe_SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data)
 {
 	uint16_t addr = address + maddress;
@@ -1422,6 +1419,7 @@ int Lms8fe_SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint
 	uint16_t addr = address + maddress;
 	int ret = 0;
 	uint16_t regValue = 0x0000;
+	for (int k = 0; k < 3; k++)
 	LMS_ReadEXTBRDReg(lms, addr, &regValue);
 	*data = regValue;
 	return ret;
@@ -1432,10 +1430,9 @@ int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size)
 	// size is 16 or 64. Units - bytes
 	uint16_t maddress = MADDRESS;
 	uint16_t maddress2 = MADDRESS2;
-
 	uint16_t data = 0;
 
-	for (int i = 0; i < size / 2; i++)  // transfer data
+	for (int i = 0; i < size / 2; i++) // transfer data
 	{
 		data = (uint16_t)(c[2 * i + 1]);
 		data = data << 8;
@@ -1443,21 +1440,42 @@ int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size)
 		Lms8fe_SPI_write(lms, maddress, i, data);
 	}
 	Lms8fe_SPI_write(lms, maddress2, 0, 0x0001); // start the Do_command()
+	//std::this_thread::sleep_for(std::chrono::milliseconds(100));	
 	return 0;
 }
 
 int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
 {
 	uint16_t maddress = MADDRESS;
-	//uint16_t maddress2 = MADDRESS2;
+	uint16_t maddress2 = MADDRESS2;
 	uint16_t data = 0;
+	bool m_bfound = false;
+	int ret = 0;
+	int i = 0;
 
-	for (int i = 0; i < size / 2; i++)
+	while ((i < 10) && (!m_bfound))
 	{
-		Lms8fe_SPI_read(lms, maddress, i, &data);
-		c[2 * i + 1] = (uint8_t)(data >> 8);
-		c[2 * i] = (uint8_t)(data & 0x00FF);
+		
+		Lms8fe_SPI_read(lms, maddress2, 0, &data);
+		if ((data & 0x00FF) == 0x0000)
+			m_bfound = true;
+		else
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			i++;
+		}
 	}
+	if (m_bfound)
+	{
+		ret = ((data & 0xFF00) >> 8);  // number of bytes returned
+		for (i = 0; i < size / 2; i++)
+		{
+			Lms8fe_SPI_read(lms, maddress, i, &data);
+			c[2 * i + 1] = (uint8_t)(data >> 8);
+			c[2 * i] = (uint8_t)(data & 0x00FF);
+		}
+	}
+	else ret = 0;
+	return ret;	
 }
-
 // end B.J.

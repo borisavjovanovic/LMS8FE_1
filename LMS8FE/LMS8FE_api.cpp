@@ -368,12 +368,18 @@ extern "C" API_EXPORT int LMS8FE_Select_Channel(lms8fe_dev_t * lms8fe, int chann
     return result;
 }
 // B.J.
-// only for testing
-// temporary
 extern "C" API_EXPORT int LMS8FE_SPI_write(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t data)
 {
     if (!lms8fe)
         return -1;
     auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
     return Lms8fe_SPI_write(dev->sdrDevice, maddress, address, data);
+}
+
+extern "C" API_EXPORT int LMS8FE_SPI_read(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t * pData)
+{
+    if (!lms8fe)
+        return -1;
+    auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
+    return Lms8fe_SPI_read(dev->sdrDevice, maddress, address, pData);
 }

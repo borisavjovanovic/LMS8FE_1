@@ -259,10 +259,12 @@ void LMS8FE_wxgui::OnbtnOpenPort(wxCommandEvent &event)
 						lms8fe = new LMS8FE_Device(nullptr, com);
 			*/
 		}
-		else
+		else {
 			lms8fe = LMS8FE_Open(nullptr, lmsControl);
+			//AddMssg("poruka1");
+	    }
 
-		if (lms8fe == nullptr)
+		   		if (lms8fe == nullptr)
 		{
 			AddMssg("Error initializing serial port");
 			return;
@@ -2435,14 +2437,48 @@ void LMS8FE_wxgui::Detailed2Simple()
 	}
 }
 
-
 // B.J.
 // temporary
-void LMS8FE_wxgui::OnbtnTESTSPI(wxCommandEvent &event)
+void LMS8FE_wxgui::OnbtnWRITESPI(wxCommandEvent &event)
 {
-	LMS8FE_SPI_write(lms8fe, 0, 0, 0xAAAA);
-        char mssg[200];
-	sprintf(mssg, "State");
-	AddMssg(mssg);
-}
+	uint16_t regValue = 0x0000;
 
+	wxString txt;
+	txt = txtCtrlADDRSPI->GetValue();
+	long addr = 0x0000;
+	if (!txt.ToLong(&addr))
+	{
+		AddMssg("Invalid value");
+		return;
+	}
+	txt = txtCtrlDATASPI->GetValue();
+	long data = 0x0000;
+	if (!txt.ToLong(&data))
+	{
+		AddMssg("Invalid value");
+		return;
+	}
+	LMS8FE_SPI_write(lms8fe, 0, addr, data);
+	
+}
+void LMS8FE_wxgui::OnbtnREADSPI(wxCommandEvent &event)
+{
+	char mssg[200];
+	uint16_t regValue = 0x0000;
+
+	wxString txt;
+	txt = txtCtrlADDRSPI->GetValue();
+	long addr = 0x0000;
+	if (!txt.ToLong(&addr))
+	{
+		AddMssg("Invalid value");
+		return;
+	}
+
+	LMS8FE_SPI_read(lms8fe, 0, addr, &regValue); // dummy read
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	sprintf(mssg, "addr=0x%04x, retValue=0x%04x", addr, regValue);
+	AddMssg(mssg);
+
+}

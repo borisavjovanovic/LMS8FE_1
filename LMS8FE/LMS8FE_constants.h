@@ -268,6 +268,7 @@ extern "C"
 */
 //B.J.
 int Lms8fe_SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data);
+int Lms8fe_SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t *data);
 
 #if __cplusplus
 }

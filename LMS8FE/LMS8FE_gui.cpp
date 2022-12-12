@@ -75,9 +75,19 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	bSizer20->Add(rbUSB, 0, wxALL, 1);
 	bSizer21->Add(bSizer20, 1, wxEXPAND, 0);
 
-	btnTESTSPI = new wxButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("TEST SPI"), wxDefaultPosition, wxSize(-1, -1), 0);
-	bSizer21->Add(btnTESTSPI, 0, wxALL, 1);
-	
+    btnREADSPI = new wxButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("READ SPI"), wxDefaultPosition, wxSize(-1, -1), 0);
+	bSizer21->Add(btnREADSPI, 0, wxALL, 1);
+
+	btnWRITESPI = new wxButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("WRITE SPI"), wxDefaultPosition, wxSize(-1, -1), 0);
+	bSizer21->Add(btnWRITESPI, 0, wxALL, 1);
+
+	txtCtrlADDRSPI = new wxTextCtrl(sbSizer31->GetStaticBox(), wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer21->Add(txtCtrlADDRSPI, 0, wxALL, 1);
+
+	txtCtrlDATASPI = new wxTextCtrl(sbSizer31->GetStaticBox(), wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer21->Add(txtCtrlDATASPI, 0, wxALL, 1);
+
+
 	sbSizer31->Add(bSizer21, 1, wxEXPAND, 0);
 
 	bSizer15->Add(sbSizer31, 1, wxEXPAND, 1);
@@ -1273,7 +1283,8 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	btnSC1905_EEPROM_Execute->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_EEPROM_Execute), NULL, this);
 	gridSC1905_EEPROM_Parameters->Connect(wxEVT_GRID_CELL_CHANGED, wxGridEventHandler(LMS8FE_view::OnGridCellChangegridSC1905_EEPROM_Parameters), NULL, this);
 	btnClearMessages->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnClearMessages), NULL, this);
- 	btnTESTSPI->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnTESTSPI), NULL, this);  //B.J.
+ 	btnREADSPI->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnREADSPI), NULL, this);  //B.J.
+	btnWRITESPI->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnWRITESPI), NULL, this);  //B.J.
 }
 
 LMS8FE_view::~LMS8FE_view()
@@ -1357,5 +1368,8 @@ LMS8FE_view::~LMS8FE_view()
 	btnSC1905_EEPROM_Execute->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnSC1905_EEPROM_Execute), NULL, this);
 	gridSC1905_EEPROM_Parameters->Disconnect(wxEVT_GRID_CELL_CHANGED, wxGridEventHandler(LMS8FE_view::OnGridCellChangegridSC1905_EEPROM_Parameters), NULL, this);
 	btnClearMessages->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnClearMessages), NULL, this);
-	btnTESTSPI->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnTESTSPI), NULL, this);  //B.J.
+	btnREADSPI->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnREADSPI), NULL, this);  //B.J.
+	btnWRITESPI->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(LMS8FE_view::OnbtnWRITESPI), NULL, this);  //B.J.
+
+
 }

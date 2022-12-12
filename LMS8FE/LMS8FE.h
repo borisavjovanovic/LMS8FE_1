@@ -599,6 +599,7 @@ extern "C"
 
 		// B.J. temprary
 	API_EXPORT int LMS8FE_SPI_write(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t data);
+	API_EXPORT int LMS8FE_SPI_read(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t * pData);
 
 #ifdef __cplusplus
 } // extern "C"

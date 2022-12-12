@@ -7,7 +7,8 @@
 #ifndef LMS8001_PARAMETERS_H
 #define LMS8001_PARAMETERS_H
 
-#include "typedefs.h"
+//#include "typedefs.h"
+#include "../lms8001/typedefs.h"
 #include <vector>
 
 #ifdef __cplusplus
