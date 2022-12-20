@@ -6,6 +6,7 @@
 
 #include "ConnectionManager.h"
 #include "ConnectionCOM.h"
+#include "./../../../LMS8FE_constants.h"
 
 #ifdef ENABLE_USB_CONNECTION
 #include "ConnectionUSB.h"
@@ -18,18 +19,26 @@
 #include <iomanip>
 #include <iostream>
 
+#include <thread>
+// #include "lime/lms7_device.h"
+
+#define MADDRESS 170 * 32
+#define MADDRESS2 171 * 32
+
 /** @brief Creates connection interfaces
  */
 ConnectionManager::ConnectionManager() : activeControlPort(NULL)
 {
     mLogData = false;
     mOpenedDevice = -1;
-    m_connections[IConnection::COM_PORT] = new ConnectionCOM();
+    lmsControlSDR = nullptr; // B.J.
+
+    m_connections[lms8_IConnection::COM_PORT] = new ConnectionCOM();
 #ifdef ENABLE_USB_CONNECTION
-    m_connections[IConnection::USB_PORT] = new ConnectionUSB();
+    m_connections[lms8_IConnection::USB_PORT] = new ConnectionUSB();
 #endif
 #ifdef ENABLE_SPI_CONNECTION
-    m_connections[IConnection::SPI_PORT] = new ConnectionSPI();
+    m_connections[lms8_IConnection::SPI_PORT] = new ConnectionSPI();
 #endif
 }
 
@@ -48,6 +57,9 @@ ConnectionManager::~ConnectionManager()
 */
 bool ConnectionManager::IsOpen()
 {
+    // if ((activeControlPort->IsOpen()) || (lmsControlSDR != nullptr))
+    // return true;
+    // else return false;    
     return activeControlPort ? activeControlPort->IsOpen() : false;
 }
 
@@ -72,14 +84,14 @@ int ConnectionManager::Open(unsigned i)
         activeControlPort->Close();
     switch (mDevices[i].port)
     {
-    case IConnection::COM_PORT:
-        activeControlPort = m_connections[IConnection::COM_PORT];
+     case lms8_IConnection::COM_PORT:
+        activeControlPort = m_connections[lms8_IConnection::COM_PORT];
         break;
-    case IConnection::USB_PORT:
-        activeControlPort = m_connections[IConnection::USB_PORT];
+    case lms8_IConnection::USB_PORT:
+        activeControlPort = m_connections[lms8_IConnection::USB_PORT];
         break;
-    case IConnection::SPI_PORT:
-        activeControlPort = m_connections[IConnection::SPI_PORT];
+    case lms8_IConnection::SPI_PORT:
+        activeControlPort = m_connections[lms8_IConnection::SPI_PORT];
         break;
     default:
         return 0;
@@ -119,7 +131,7 @@ int ConnectionManager::RefreshDeviceList()
     for (auto iter = m_connections.begin(); iter != m_connections.end(); ++iter)
     {
         vector<string> names;
-        IConnection *port = iter->second;
+        lms8_IConnection *port = iter->second;
         if (port->RefreshDeviceList() > 0)
         {
             names = port->GetDeviceNames();
@@ -154,7 +166,20 @@ int ConnectionManager::Write(const unsigned char *buffer, const int length, int 
 {
     if (activeControlPort)
     {
+
+        // B.J. debug
+        /*
+        cout << "COM Write ";  // B.J.
+        uint8_t X10, X1 = 0x00;
+        for (int i=0; i<length; i++) {
+            ConvertToAscii(buffer[i], &X10, &X1);
+            cout << X10 << X1;
+        }
+        cout << std::endl;
+        */
+
         int bytesTransferred = activeControlPort->Write(buffer, length, timeout_ms);
+
 #ifndef NDEBUG
         if (mLogData)
         {
@@ -180,7 +205,48 @@ int ConnectionManager::Write(const unsigned char *buffer, const int length, int 
 #endif
         return bytesTransferred;
     }
+    else if (lmsControlSDR != nullptr)
+    {
+
+        int bytesTransferred = SPI_write_buffer(lmsControlSDR, buffer, length);
+        // std::this_thread::sleep_for(std::chrono::microseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // B.J. debug
+        /*
+        cout << "SPI Write ";  // B.J.
+        uint8_t X10, X1 = 0x00;
+        for (int i=0; i<length; i++) {
+            ConvertToAscii(buffer[i], &X10, &X1);
+            cout << X10 << X1;
+        }
+        cout << std::endl;
+        */
+
+        return bytesTransferred;
+    }
     return -1;
+}
+
+void ConnectionManager::ConvertToAscii(uint8_t ch, uint8_t *pX10, uint8_t *pX1)
+{
+
+    uint8_t X10, X1 = 0;
+
+    X10 = ((ch & 0xF0) >> 4);
+    X1 = (ch & 0x0F);
+
+    if (X10 > 9)
+        X10 = X10 + 0x37; // A-F
+    else
+        X10 = X10 + 0x30; // 0-9
+
+    if (X1 > 9)
+        X1 = X1 + 0x37;
+    else
+        X1 = X1 + 0x30;
+
+    *pX10 = X10;
+    *pX1 = X1;
 }
 
 /** @brief Receives data from currently opened connection
@@ -191,9 +257,22 @@ int ConnectionManager::Write(const unsigned char *buffer, const int length, int 
 */
 int ConnectionManager::Read(unsigned char *buffer, int length, int timeout_ms)
 {
+
+    // printf("Read\n");
     if (activeControlPort)
     {
+
         int bytesTransferred = activeControlPort->Read(buffer, length, timeout_ms);
+        /*
+        cout << "COM Read " << std::endl;  // B.J.
+        uint8_t X10, X1 = 0x00;
+        for (int i=0; i<length; i++) {
+            ConvertToAscii(buffer[i], &X10, &X1);
+            cout << X10 << X1;
+        }
+        cout << std::endl;
+        */
+
 #ifndef NDEBUG
         if (mLogData)
         {
@@ -217,6 +296,24 @@ int ConnectionManager::Read(unsigned char *buffer, int length, int timeout_ms)
             cout << ss.str() << endl;
         }
 #endif
+        return bytesTransferred;
+    }
+    else if (lmsControlSDR != nullptr)
+    {
+
+        // std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
+        int bytesTransferred = SPI_read_buffer(lmsControlSDR, buffer, length);
+        // std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
+
+        /*
+        cout << "SPI Read " << std::endl;  // B.J.
+        uint8_t X10, X1 = 0x00;
+        for (int i=0; i<length; i++) {
+            ConvertToAscii(buffer[i], &X10, &X1);
+            cout << X10 << X1;
+        }
+        cout << std::endl;
+        */
         return bytesTransferred;
     }
     return -1;
@@ -317,7 +414,7 @@ void ConnectionManager::AbortSending()
 #ifndef __unix__
 void ConnectionManager::InheritCOM(HANDLE handle)
 {
-    activeControlPort = m_connections[IConnection::COM_PORT];
+    activeControlPort = m_connections[lms8_IConnection::COM_PORT];
     ConnectionCOM *tmp = (ConnectionCOM *)activeControlPort;
     tmp->inheritedCOM = true;
     tmp->InheritHCOMM(handle);
@@ -326,9 +423,104 @@ void ConnectionManager::InheritCOM(HANDLE handle)
 // B.J. -- unix support
 void ConnectionManager::InheritCOM(int handle)
 {
-    activeControlPort = m_connections[IConnection::COM_PORT];
+    activeControlPort = m_connections[lms8_IConnection::COM_PORT];
     ConnectionCOM *tmp = (ConnectionCOM *)activeControlPort;
     tmp->inheritedCOM = true;
     tmp->InheritHCOMM(handle);
 }
 #endif
+
+// B.J.
+void ConnectionManager::InitializeSDR(lms_device_t *lms)
+{
+    lmsControlSDR = lms;
+}
+
+int ConnectionManager::SPI_write(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t data)
+{
+    int ret = 0;
+    ret = Lms8fe_SPI_write(lms, maddress, address, data);
+    return ret;
+}
+
+int ConnectionManager::SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint16_t *data)
+{
+    int ret = 0;
+    uint16_t regValue = 0x0000;
+    ret = Lms8fe_SPI_read(lms, maddress, address, &regValue);
+    *data = regValue;
+    return ret;
+}
+
+int ConnectionManager::SPI_write_buffer(lms_device_t *lms, const unsigned char *c, int size)
+{
+
+    Lms8fe_spi_write_buffer(lms, (unsigned char *)c, size);
+    // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    /*
+    // size is 16 or 64. Units - bytes
+    uint16_t maddress = MADDRESS;
+    uint16_t maddress2 = MADDRESS2;
+    uint16_t data = 0;
+    for (int i = 0; i < size / 2; i++) // transfer data
+    {
+        data = (uint16_t)(c[2 * i + 1]);
+        data = data << 8;
+        data += (uint16_t)(c[2 * i]);
+        SPI_write(lms, maddress, i, data);
+    }
+    SPI_write(lms, maddress2, 0, 0x0001); // start the Do_command()
+    //
+    */
+
+    return size;
+}
+
+int ConnectionManager::SPI_read_buffer(lms_device_t *lms, unsigned char *c, int size)
+{
+
+    // Lms8fe_spi_read_buffer2(lms, c, size);
+    // B.J.
+    Lms8fe_spi_read_buffer(lms, c, size);
+    return size;
+
+    /*
+    uint16_t maddress = MADDRESS;
+    uint16_t maddress2 = MADDRESS2;
+    uint16_t data = 0;
+    bool m_bfound = false;
+    int ret = 0;
+    int i = 0;
+    int numtry = 0;
+    while ((i < 10) && (!m_bfound))
+    {
+
+        SPI_read(lms, maddress2, 0, &data);
+        if ((data & 0x00FF) == 0x0000)
+            m_bfound = true;
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            i++;
+        }
+    }
+    if (m_bfound)
+    {
+        numtry = i;
+        ret = ((data & 0xFF00) >> 8);  // number of bytes returned
+        for (i = 0; i < size / 2; i++)
+        {
+            SPI_read(lms, maddress, i, &data);
+            c[2 * i + 1] = (uint8_t)(data >> 8);
+            c[2 * i] = (uint8_t)(data & 0x00FF);
+        }
+    }
+    else {
+        ret = 0;
+        numtry = 10;
+    }
+    return ret;
+    */
+}
+// end B.J.

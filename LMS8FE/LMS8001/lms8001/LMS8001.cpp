@@ -114,8 +114,10 @@ liblms8_status LMS8001::ResetChip()
 {
     if (controlPort == NULL)
         return LIBLMS8_NO_CONNECTION_MANAGER;
-    if (controlPort->IsOpen() == false)
-        return LIBLMS8_NOT_CONNECTED;
+
+      // B.J.: needs to be checked !!!!!    
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
+      return LIBLMS8_NOT_CONNECTED;
 
     LMScomms::GenericPacket pkt;
     pkt.cmd = CMD_LMS8001_RST;
@@ -196,8 +198,10 @@ liblms8_status LMS8001::LoadConfig(const char* filename)
 //	Modify_SPI_Reg_bits(MAC, 1);
 	if (controlPort == NULL)
 		return LIBLMS8_NO_CONNECTION_MANAGER;
-	if (controlPort->IsOpen() == false)
-		return LIBLMS8_NOT_CONNECTED;
+
+	  // B.J.: needs to be checked !!!!!    
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
+ 		return LIBLMS8_NOT_CONNECTED;
     return LIBLMS8_SUCCESS;
 }
 
@@ -461,8 +465,10 @@ liblms8_status LMS8001::SPI_write(uint16_t address, uint16_t data)
 //        mRegistersMap->SetValue(0, address, data);
 
 	//msavic - UNCOMMENT, TEMP, DEBUG ONLY!!!!!!!!!
-    if (controlPort->IsOpen() == false)
-        return LIBLMS8_NOT_CONNECTED;
+
+    // B.J.: needs to be checked !!!!!    
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
+          return LIBLMS8_NOT_CONNECTED;
 
     LMScomms::GenericPacket pkt;
     pkt.cmd = CMD_LMS8001_WR;
@@ -490,7 +496,7 @@ uint16_t LMS8001::SPI_read(uint16_t address, bool fromChip, liblms8_status *stat
         if (status)
             *status = LIBLMS8_NO_CONNECTION_MANAGER;
     }
-    if (controlPort->IsOpen() == false || fromChip == false)
+    if (((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr)) || fromChip == false)
     {
 //        if ((mRegistersMap->GetValue(0, LMS8param(MAC).address) & 0x0003) > 1 && address >= 0x0100)
 //            return mRegistersMap->GetValue(1, address);
@@ -548,7 +554,8 @@ liblms8_status LMS8001::SPI_write_batch(const uint16_t* spiAddr, const uint16_t*
 
     if (controlPort == NULL)
         return LIBLMS8_NO_CONNECTION_MANAGER;
-    if (controlPort->IsOpen() == false)
+    // B.J.: needs to be checked !!!!!    
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
         return LIBLMS8_NOT_CONNECTED;
 
     controlPort->TransferPacket(pkt);
@@ -577,7 +584,8 @@ liblms8_status LMS8001::SPI_read_batch(const uint16_t* spiAddr, uint16_t* spiDat
 
     if (controlPort == NULL)
         return LIBLMS8_NO_CONNECTION_MANAGER;
-    if (controlPort->IsOpen() == false)
+    // B.J.: needs to be checked !!!!!    
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))    
         return LIBLMS8_NOT_CONNECTED;
 
     LMScomms::TransferStatus status = controlPort->TransferPacket(pkt);
@@ -616,8 +624,9 @@ liblms8_status LMS8001::RegistersTest()
     char chex[16];
     if (controlPort == NULL)
         return LIBLMS8_NO_CONNECTION_MANAGER;
-    if (controlPort->IsOpen() == false)
-        return LIBLMS8_NOT_CONNECTED;
+    // B.J.: needs to be checked !!!!!    
+    if ((controlPort->IsOpen() == false)) //&& (controlPort->lmsControlSDR == nullptr))
+            return LIBLMS8_NOT_CONNECTED;
 
     liblms8_status status;
 
@@ -870,7 +879,8 @@ void LMS8001::RestoreAllRegisters()
 */
 bool LMS8001::IsSynced()
 {
-    if (controlPort->IsOpen() == false)
+    // B.J.: needs to be checked !!!!!
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
         return false;
     bool isSynced = true;
     liblms8_status status;
@@ -948,7 +958,8 @@ liblms8_status LMS8001::UploadAll()
 {
     if (controlPort == NULL)
         return LIBLMS8_NO_CONNECTION_MANAGER;
-    if (controlPort->IsOpen() == false)
+    // B.J.: needs to be checked !!!!!
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
         return LIBLMS8_NOT_CONNECTED;
 
 //    uint8_t ch = (uint8_t)Get_SPI_Reg_bits(LMS8param(MAC)); //remember used channel
@@ -1005,7 +1016,8 @@ liblms8_status LMS8001::DownloadAll()
 {
     if (controlPort == nullptr)
         return LIBLMS8_NO_CONNECTION_MANAGER;
-    if (controlPort->IsOpen() == false)
+    // B.J.: needs to be checked !!!!!
+    if ((controlPort->IsOpen() == false) && (controlPort->lmsControlSDR == nullptr))
         return LIBLMS8_NOT_CONNECTED;
     liblms8_status status;
 //    uint8_t ch = (uint8_t)Get_SPI_Reg_bits(LMS8param(MAC), false);

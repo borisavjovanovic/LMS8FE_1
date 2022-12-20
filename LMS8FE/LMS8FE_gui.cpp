@@ -75,6 +75,11 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	bSizer20->Add(rbUSB, 0, wxALL, 1);
 	bSizer21->Add(bSizer20, 1, wxEXPAND, 0);
 
+	// B.J.
+
+	cbSingle = new wxCheckBox(sbSizer31->GetStaticBox(), wxID_ANY, wxT("Single R/W"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer21->Add(cbSingle, 0, wxALL, 2);
+
     btnREADSPI = new wxButton(sbSizer31->GetStaticBox(), wxID_ANY, wxT("READ SPI"), wxDefaultPosition, wxSize(-1, -1), 0);
 	bSizer21->Add(btnREADSPI, 0, wxALL, 1);
 
@@ -476,7 +481,7 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 	fgSizer6->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	m_panel8 = new wxPanel(pnlRFPAL, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED | wxTAB_TRAVERSAL);
-	m_panel8->Hide();
+	//m_panel8->Hide();
 
 	wxStaticBoxSizer *sbSizer7;
 	sbSizer7 = new wxStaticBoxSizer(new wxStaticBox(m_panel8, wxID_ANY, wxT("SC1905 Test")), wxVERTICAL);
@@ -627,7 +632,7 @@ LMS8FE_view::LMS8FE_view(wxWindow *parent, wxWindowID id, const wxString &title,
 
 	gSizer11->Add(txtCtrlSC1905_Overall_Status, 0, wxALL | wxEXPAND, 0);
 
-	wxString chSC1905_Update_RateChoices[] = {wxT("No refresh"), wxT("0.5 seconds"), wxT("1 second")};
+	wxString chSC1905_Update_RateChoices[] = {wxT("No refresh"), wxT("5 seconds"), wxT("10 seconds")};
 	int chSC1905_Update_RateNChoices = sizeof(chSC1905_Update_RateChoices) / sizeof(wxString);
 	chSC1905_Update_Rate = new wxChoice(sbSizer81->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, chSC1905_Update_RateNChoices, chSC1905_Update_RateChoices, 0);
 	chSC1905_Update_Rate->SetSelection(0);

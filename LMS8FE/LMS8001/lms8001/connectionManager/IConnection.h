@@ -12,7 +12,7 @@
 
 using namespace std;
 
-class IConnection
+class lms8_IConnection
 {
 public:
     /// Supported connection types.
@@ -34,8 +34,8 @@ public:
         CANNOT_CLAIM_INTERFACE
     };
 
-	IConnection() : m_connectionType(CONNECTION_UNDEFINED){};
-	virtual ~IConnection(){};
+	lms8_IConnection() : m_connectionType(CONNECTION_UNDEFINED){};
+	virtual ~lms8_IConnection(){};
 	virtual int RefreshDeviceList() = 0;
 	virtual DeviceStatus Open(unsigned i) = 0;
 	virtual void Close() = 0;

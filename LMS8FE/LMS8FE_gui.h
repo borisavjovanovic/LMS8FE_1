@@ -53,6 +53,8 @@ protected:
     
     wxButton *btnREADSPI; // B.J.
 	wxButton *btnWRITESPI; // B.J.
+	wxCheckBox *cbSingle; //B.J.
+	
 	wxTextCtrl* txtCtrlADDRSPI; 
 	wxTextCtrl* txtCtrlDATASPI;
 

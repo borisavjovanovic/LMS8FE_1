@@ -33,7 +33,7 @@ LMS8_Device* LMS8_Device::CreateDevice()
 {
     LMScomms* conn = new LMScomms();
     conn->RefreshDeviceList();
-    if (conn->Open(0) != IConnection::SUCCESS) {
+    if (conn->Open(0) != lms8_IConnection::SUCCESS) {
         return nullptr; //Error (?!)
     }
 
@@ -46,7 +46,7 @@ LMS8_Device* LMS8_Device::CreateDevice(int i)
 {
     LMScomms* conn = new LMScomms();
     conn->RefreshDeviceList();
-    if (conn->Open(i) != IConnection::SUCCESS) {
+    if (conn->Open(i) != lms8_IConnection::SUCCESS) {
         return nullptr; //Error (?!)
     }
 
@@ -58,7 +58,7 @@ LMS8_Device* LMS8_Device::CreateDevice(int i)
     {
         if(mListLMS8ports->GetSelection() != wxNOT_FOUND)
         {
-            if (lms8port->Open(mListLMS8ports->GetSelection()) != IConnection::SUCCESS)
+            if (lms8port->Open(mListLMS8ports->GetSelection()) != lms8_IConnection::SUCCESS)
                 wxMessageBox("Failed to open LMS8 control device", "Error", wxICON_STOP);
             else
             {
@@ -122,7 +122,7 @@ LMS8_Device* LMS8_Device::CreateDevice(int i)
     }
 */
 
-//    LMS8_Device::LMS8_Device(lime::IConnection* conn)
+//    LMS8_Device::LMS8_Device(lime::lms8_IConnection* conn)
 LMS8_Device::LMS8_Device(LMScomms* conn)
 {
     connection = conn;
@@ -279,7 +279,7 @@ LMS7_Device::~LMS7_Device()
     lime::ConnectionRegistry::freeConnection(connection);
 }
 
-lime::IConnection* LMS7_Device::`ection(unsigned chan)
+lime::lms8_IConnection* LMS7_Device::`ection(unsigned chan)
 {
     return connection;
 }
@@ -1660,7 +1660,7 @@ std::vector<std::string> LMS7_Device::GetProgramModes() const
             program_mode::mcuRAM, program_mode::mcuEEPROM, program_mode::mcuReset};
 }
 
-int LMS7_Device::Program(const std::string& mode, const char* data, size_t len, lime::IConnection::ProgrammingCallback callback) const
+int LMS7_Device::Program(const std::string& mode, const char* data, size_t len, lime::lms8_IConnection::ProgrammingCallback callback) const
 {
     if (connection == nullptr)
         return lime::ReportError(EINVAL, "Device not connected");
@@ -1685,14 +1685,14 @@ int LMS7_Device::Program(const std::string& mode, const char* data, size_t len, 
         return lms->SPI_write(0x0002, 0x0003);
     } else if (mode == program_mode::mcuRAM || mode == program_mode::mcuEEPROM){
         lime::MCU_BD *mcu = lms_list.at(lms_chip_id)->GetMCUControls();
-        lime::IConnection::MCU_PROG_MODE prog_mode;
+        lime::lms8_IConnection::MCU_PROG_MODE prog_mode;
         uint8_t bin[lime::MCU_BD::cMaxFWSize];
         memcpy(bin,data,len>sizeof(bin) ? sizeof(bin) : len);
 
         if (mode == program_mode::mcuRAM)
-            prog_mode = lime::IConnection::MCU_PROG_MODE::SRAM;
+            prog_mode = lime::lms8_IConnection::MCU_PROG_MODE::SRAM;
         else
-            prog_mode = lime::IConnection::MCU_PROG_MODE::EEPROM_AND_SRAM;
+            prog_mode = lime::lms8_IConnection::MCU_PROG_MODE::EEPROM_AND_SRAM;
         mcu->callback = callback;
         mcu->Program_MCU(bin,prog_mode);
         mcu->callback = nullptr;
@@ -2053,7 +2053,7 @@ int LMS7_Device::MCU_AGCStart(uint32_t wantedRSSI)
     if(mcuID != MCU_ID_CALIBRATIONS_SINGLE_IMAGE)
     {
         lime::debug("Uploading MCU AGC firmware");
-        int status = mcu->Program_MCU(mcu_program_lms7_dc_iq_calibration_bin, lime::IConnection::MCU_PROG_MODE::SRAM);
+        int status = mcu->Program_MCU(mcu_program_lms7_dc_iq_calibration_bin, lime::lms8_IConnection::MCU_PROG_MODE::SRAM);
         lime::info("MCU AGC firmware uploaded");
         if(status != 0)
             return status;

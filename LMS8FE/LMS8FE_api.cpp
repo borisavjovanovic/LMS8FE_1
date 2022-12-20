@@ -6,6 +6,7 @@
 // #include "Logger.h"
 #include "./LMS8001/API/lms8_device.h"
 #include "./LMS8001/lms8001/lmsComms.h"
+#include <iostream>
 
 #define SERIAL_BAUDRATE 9600
 // #define SERIAL_BAUDRATE 115200
@@ -23,7 +24,9 @@ extern "C" API_EXPORT lms8fe_dev_t *CALL_CONV LMS8FE_Open(const char *serialport
     int result;
 
     LMS8FE_COM com;
+    // for unix
     com.fd = -1;
+    com.hComm = -1; // B.J.
 #ifndef __unix__
     com.hComm = 0;
 #endif
@@ -32,11 +35,18 @@ extern "C" API_EXPORT lms8fe_dev_t *CALL_CONV LMS8FE_Open(const char *serialport
         result = Lms8fe_serialport_init(serialport, SERIAL_BAUDRATE, &com);
         if (result == -1)
             return nullptr;
+        cout << "com.fd =" << com.fd << std::endl; // B.J.  
+        cout << "com.hComm ="  <<(int)com.hComm << std::endl; //B.J.    
         // milans 220421
         //		result = Cmd_Hello(com);
         //         if (result == LMS8FE_ERROR_COMM) {
         //             return nullptr;
         //         }
+    }
+    else {
+        cout << "com.fd =" << com.fd << std::endl; // B.J.  
+        cout << "com.hComm ="  <<(int)com.hComm << std::endl; //B.J. 
+        //Lms8fe_Cmd_Hello(dev, com); 
     }
     return new LMS8FE_Device(dev, com);
 }
@@ -383,3 +393,30 @@ extern "C" API_EXPORT int LMS8FE_SPI_read(lms8fe_dev_t *lms8fe, uint16_t maddres
     auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
     return Lms8fe_SPI_read(dev->sdrDevice, maddress, address, pData);
 }
+
+
+extern "C" API_EXPORT int LMS8FE_SPI_write_buffer(lms_device_t *lms8fe, unsigned char *c, int size) {
+    if (!lms8fe)
+        return -1;
+    auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
+    return Lms8fe_spi_write_buffer(dev->sdrDevice, c, size);
+}
+
+/*
+extern "C" API_EXPORT int LMS8FE_SPI_read_buffer2(lms_device_t *lms8fe, unsigned char *c, int size) {
+
+    if (!lms8fe)
+        return -1;
+    auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
+    return Lms8fe_spi_read_buffer2(dev->sdrDevice, c, size);
+}
+*/
+
+extern "C" API_EXPORT int LMS8FE_SPI_read_buffer(lms_device_t *lms8fe, unsigned char *c, int size) {
+
+    if (!lms8fe)
+        return -1;
+    auto *dev = static_cast<LMS8FE_Device *>(lms8fe);
+    return Lms8fe_spi_read_buffer(dev->sdrDevice, c, size);
+}
+

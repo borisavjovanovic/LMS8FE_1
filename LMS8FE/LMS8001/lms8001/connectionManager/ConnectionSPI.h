@@ -7,12 +7,12 @@
 #ifndef CONNECTION_SPI_PORT_H
 #define CONNECTION_SPI_PORT_H
 
-#include "IConnection.h"
+#include "./IConnection.h"
 #include <fstream>
 #include <string>
 #include <vector>
 
-class ConnectionSPI : public IConnection
+class ConnectionSPI : public lms8_IConnection
 {
 public:
     static const int cSPI_BUF_SIZE;

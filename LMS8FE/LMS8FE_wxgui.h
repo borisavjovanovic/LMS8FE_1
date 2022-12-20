@@ -22,9 +22,16 @@
 #include <vector>
 
 #include <thread>
+#include <wx/timer.h>
 // B.J.
 #include <atomic>
 #include <memory>
+#include <wx/wx.h>
+enum
+{
+    TIMER_ID2 = 10
+};
+// end B.J.
 
 #define sbi(p, n) ((p) |= (1UL << (n)))
 #define cbi(p, n) ((p) &= ~(1 << (n)))
@@ -278,6 +285,13 @@ protected:
 	void Detailed2Simple();
 
 	bool applied = false;
+
+	// B.J.
+	static const long ID_READING_FINISHED_EVENT;
+	wxTimer * m_timer;
+	void OnTimer(wxTimerEvent &event);
+	void run();
+	DECLARE_EVENT_TABLE();
 
 public:
 	/** Constructor */

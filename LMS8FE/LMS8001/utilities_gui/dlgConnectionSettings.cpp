@@ -48,7 +48,7 @@ void lms8_dlgConnectionSettings::OnConnect(wxCommandEvent &event)
 	{
 		if (mListLMS8ports->GetSelection() != wxNOT_FOUND)
 		{
-			if (lms8port->Open(mListLMS8ports->GetSelection()) != IConnection::SUCCESS)
+			if (lms8port->Open(mListLMS8ports->GetSelection()) != lms8_IConnection::SUCCESS)
 				wxMessageBox("Failed to open LMS8 control device", "Error", wxICON_STOP);
 			else
 			{

@@ -600,6 +600,8 @@ extern "C"
 		// B.J. temprary
 	API_EXPORT int LMS8FE_SPI_write(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t data);
 	API_EXPORT int LMS8FE_SPI_read(lms8fe_dev_t *lms8fe, uint16_t maddress, uint16_t address, uint16_t * pData);
+	API_EXPORT int LMS8FE_SPI_write_buffer(lms_device_t *lms, unsigned char *c, int size);
+	API_EXPORT int LMS8FE_SPI_read_buffer(lms_device_t *lms, unsigned char *c, int size);
 
 #ifdef __cplusplus
 } // extern "C"

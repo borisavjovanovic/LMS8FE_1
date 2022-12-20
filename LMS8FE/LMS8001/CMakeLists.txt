@@ -56,8 +56,10 @@ set(LMS8API_SOURCES
 #    API/Lms8Generic.cpp
 #    ConnectionRegistry/IConnection.cpp
 #    ConnectionRegistry/ConnectionHandle.cpp
-#    ConnectionRegistry/ConnectionRegistry.cpp
-    lms8001/LMS8001_RegistersMap.cpp
+#    ConnectionRegistry/ConnectionRegistry.cpp    
+    # NOVO!
+    ./../LMS8FE_cmd.cpp    
+	lms8001/LMS8001_RegistersMap.cpp
     lms8001/LMS8001_parameters.cpp
     lms8001/LMS8001.cpp
     lms8001/lmsComms.cpp
@@ -75,7 +77,8 @@ set(LMS8API_SOURCES
 
 add_library(LMS8API SHARED ${LMS8API_SOURCES})
 target_include_directories(LMS8API PUBLIC ${LMS8API_INCLUDES})
-target_link_libraries(LMS8API ${CYAPI_LIBRARIES})
+target_link_libraries(LMS8API LimeSuite ${CYAPI_LIBRARIES})
+# NOVO! LimeSuite
 
 if (MSVC)
 	set_target_properties(LMS8API PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -105,7 +108,9 @@ else()
 	add_library(lms8suite STATIC ${lms8suiteApp})
 endif()	
 	
-target_link_libraries( lms8suite 
+# NOVO! LimeSuite
+target_link_libraries( lms8suite
+    LimeSuite 
 	ADF4002 	
 	Si5351C 	
 	lms8001_wxgui 

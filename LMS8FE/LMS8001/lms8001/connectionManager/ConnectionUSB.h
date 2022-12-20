@@ -7,7 +7,7 @@
 #ifndef USB_PORT_CONNECTION_H
 #define USB_PORT_CONNECTION_H
 
-#include "IConnection.h"
+#include "./IConnection.h"
 
 #ifndef __unix__
 #include "windows.h"
@@ -74,7 +74,7 @@ public:
 	#endif
 };
 
-class ConnectionUSB : public IConnection
+class ConnectionUSB : public lms8_IConnection
 {
 public:
 	ConnectionUSB();

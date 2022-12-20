@@ -113,7 +113,7 @@ ConnectionSPI::~ConnectionSPI()
 /** @brief Opens connection to first found chip
     @return 0-success
 */
-IConnection::DeviceStatus ConnectionSPI::Open()
+lms8_IConnection::DeviceStatus ConnectionSPI::Open()
 {
 	Close();
 #ifdef __unix__
@@ -121,7 +121,7 @@ IConnection::DeviceStatus ConnectionSPI::Open()
 	if (fd < 0)
 	{
         //MessageLog::getInstance()->write("SPI PORT: device not found\n", LOG_ERROR);
-		return IConnection::FAILURE;
+		return lms8_IConnection::FAILURE;
 	}
 	int mode = SPI_MODE_0;
 	int ret = ioctl(fd, SPI_IOC_WR_MODE, &mode);
@@ -159,9 +159,9 @@ IConnection::DeviceStatus ConnectionSPI::Open()
 	printf("spi mode: 0x%x\n", mode);
 	printf("bits per word: %d\n", bits);
 	printf("max speed: %d Hz (%d KHz)\n", speed, speed/1000);
-    return IConnection::SUCCESS;
+    return lms8_IConnection::SUCCESS;
 #else
-    return IConnection::FAILURE;
+    return lms8_IConnection::FAILURE;
 #endif
 }
 
@@ -169,7 +169,7 @@ IConnection::DeviceStatus ConnectionSPI::Open()
     @param index chip index in device list
     @return 0-success
 */
-IConnection::DeviceStatus ConnectionSPI::Open(unsigned index)
+lms8_IConnection::DeviceStatus ConnectionSPI::Open(unsigned index)
 {
     return Open();
 }

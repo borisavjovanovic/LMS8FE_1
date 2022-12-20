@@ -69,7 +69,7 @@ ConnectionUSB::~ConnectionUSB()
 /**	@brief Automatically open first available chip connected to usb port.
 	@return 0-success, other-failure
 */
-IConnection::DeviceStatus ConnectionUSB::Open()
+lms8_IConnection::DeviceStatus ConnectionUSB::Open()
 {
     currentDeviceIndex = -1;
     if(m_deviceNames.size() == 0)
@@ -92,7 +92,7 @@ IConnection::DeviceStatus ConnectionUSB::Open()
 /**	@brief Tries to open connected USB device and find communication endpoints.
 	@return Returns 1-Success, 0-EndPoints not found or device didn't connect.
 */
-IConnection::DeviceStatus ConnectionUSB::Open(unsigned index)
+lms8_IConnection::DeviceStatus ConnectionUSB::Open(unsigned index)
 {
 #ifndef __unix__
 	wstring m_hardwareDesc = L"";

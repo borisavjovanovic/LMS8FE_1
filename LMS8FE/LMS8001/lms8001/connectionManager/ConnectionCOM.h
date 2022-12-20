@@ -11,9 +11,9 @@
 #include "windows.h"
 #endif
 
-#include "IConnection.h"
+#include "./IConnection.h"
 
-class ConnectionCOM : public IConnection
+class ConnectionCOM : public lms8_IConnection
 {
 public:
 	static const int COM_BUFFER_LENGTH = 1024; // max buffer size for data

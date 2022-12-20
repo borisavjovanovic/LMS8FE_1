@@ -53,7 +53,7 @@ ConnectionCOM::~ConnectionCOM()
 /** @brief Opens connection to first found chip
 	@return 0-success
 */
-IConnection::DeviceStatus ConnectionCOM::Open()
+lms8_IConnection::DeviceStatus ConnectionCOM::Open()
 {
 	comPortList.clear();
 	if (comPortList.size() == 0)
@@ -78,16 +78,17 @@ IConnection::DeviceStatus ConnectionCOM::Open()
 	@param index chip index in device list
 	@return 0-success
 */
-IConnection::DeviceStatus ConnectionCOM::Open(unsigned index)
+lms8_IConnection::DeviceStatus ConnectionCOM::Open(unsigned index)
 {
 	unsigned int toOpen = index;
 	Close();
 	if (toOpen < m_deviceNames.size() && m_deviceNames.size() > 0)
 	{
 		comPortName = m_deviceNames[toOpen];
-		IConnection::DeviceStatus status = Open(comPortName.c_str(), comBaudrate);
+		lms8_IConnection::DeviceStatus status = Open(comPortName.c_str(), comBaudrate);
 		if (status == SUCCESS)
 			currentDeviceIndex = toOpen;
+					 cout << "COM: (int)dev->com.hComm =" << (int) hComm << std::endl; // B.J.	
 		return status;
 	}
 	return FAILURE;
@@ -369,7 +370,7 @@ void ConnectionCOM::FindAllComPorts()
 	@param baudrate COM port baudrate
 	@return 0 on success
 */
-IConnection::DeviceStatus ConnectionCOM::Open(const char *comName, int baudrate)
+lms8_IConnection::DeviceStatus ConnectionCOM::Open(const char *comName, int baudrate)
 {
 	Close();
 	if (strlen(comName) == 0)

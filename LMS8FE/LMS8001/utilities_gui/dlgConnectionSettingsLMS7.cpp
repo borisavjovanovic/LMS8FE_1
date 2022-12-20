@@ -48,7 +48,7 @@ void lms8_dlgConnectionSettingsLMS7::OnConnect(wxCommandEvent &event)
 	{
 		if (mListLMS7ports->GetSelection() != wxNOT_FOUND)
 		{
-			if (lms7port->Open(mListLMS7ports->GetSelection()) != IConnection::SUCCESS)
+			if (lms7port->Open(mListLMS7ports->GetSelection()) != lms8_IConnection::SUCCESS)
 				wxMessageBox("Failed to open LMS7 control device", "Error", wxICON_STOP);
 			else
 			{

@@ -2,10 +2,11 @@
 #include "INI.h"
 #include <chrono>
 #include "lime/lms7_device.h"
+#include <iostream>
 // #include "LimeSuite.h"
 
-#define MADDRESS 0
-#define MADDRESS2 0 + 32
+#define MADDRESS 170 * 32
+#define MADDRESS2 171 * 32
 /*********************************************************************************************
  * USB Communication
  **********************************************************************************************/
@@ -146,6 +147,9 @@ int Lms8fe_serialport_init(const char *serialport, int baud, LMS8FE_COM *com)
 		return -1;
 	}
 
+	// for unix
+	com->hComm = com->fd; // B.J.
+
 #else
 	HANDLE hComm;
 	char *port;
@@ -241,6 +245,7 @@ int Lms8fe_serialport_close(LMS8FE_COM com)
 
 int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size);
 int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size);
+void ConvertToAscii(uint8_t ch, uint8_t *pX10, uint8_t *pX1);
 
 int Lms8fe_write_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, int size)
 {
@@ -278,6 +283,9 @@ int Lms8fe_read_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, i
 	{
 		// B.J.
 		// return Lms8fe_i2c_read_buffer(dev, data, size);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+		// B.J.  it must be at least 100ms delay because of SC1905
 		return Lms8fe_spi_read_buffer(dev, data, size);
 	}
 	return -1; // error: both dev and fd are invalid
@@ -560,7 +568,7 @@ void Lms8fe_mySleep(int sleepms)
 #endif
 }
 
-int Lms8fe_Cmd_Hello(LMS8FE_COM com)
+int Lms8fe_Cmd_Hello(lms_device_t *dev, LMS8FE_COM com)
 {
 	int result = 0;
 	unsigned char buf[1];
@@ -573,10 +581,10 @@ int Lms8fe_Cmd_Hello(LMS8FE_COM com)
 
 	while (!connected && (attempts < LMS8FE_MAX_HELLO_ATTEMPTS))
 	{
-		Lms8fe_write_buffer_fd(com, buf, 1);
+		Lms8fe_write_buffer(dev, com, buf, 1);
 		Lms8fe_mySleep(LMS8FE_TIME_BETWEEN_HELLO_MS);
 #ifdef __unix__
-		len = Lms8fe_read_buffer_fd(com, buf, 1);
+		len = Lms8fe_read_buffer(dev, com, buf, 1);
 #else
 		DWORD dwlen;
 		ReadFile(com.hComm, buf, 1, &dwlen, NULL);
@@ -1419,31 +1427,66 @@ int Lms8fe_SPI_read(lms_device_t *lms, uint16_t maddress, uint16_t address, uint
 	uint16_t addr = address + maddress;
 	int ret = 0;
 	uint16_t regValue = 0x0000;
-	for (int k = 0; k < 3; k++)
+	for (int k = 0; k < 6; k++)
 	LMS_ReadEXTBRDReg(lms, addr, &regValue);
 	*data = regValue;
 	return ret;
 }
+
+/*
+int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size)
+{
+	uint16_t maddress = MADDRESS;
+	uint16_t maddress2 = MADDRESS2;
+	uint16_t data = 0;
+	for (int i = 0; i < (size / 2); i++) 
+	{
+		data = 0;
+		data = (uint16_t)(c[2 * i + 1]);
+		data = data << 8;
+		data += (uint16_t)(c[2 * i]);
+		Lms8fe_SPI_write(lms, maddress, i, data);
+	}
+	Lms8fe_SPI_write(lms, maddress2, 0, 0x0001); /
+	return 0;
+}
+*/
 
 int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size)
 {
 	// size is 16 or 64. Units - bytes
 	uint16_t maddress = MADDRESS;
 	uint16_t maddress2 = MADDRESS2;
-	uint16_t data = 0;
+	uint32_t data[64];
+	uint32_t addr[64];
+	int i = 0;
 
-	for (int i = 0; i < size / 2; i++) // transfer data
+	for (i = 0; i < (size / 2); i++) // transfer data
 	{
-		data = (uint16_t)(c[2 * i + 1]);
-		data = data << 8;
-		data += (uint16_t)(c[2 * i]);
-		Lms8fe_SPI_write(lms, maddress, i, data);
+		addr[i] = maddress + i;
+		data[i] = 0;
+		data[i] = (uint16_t)(c[2 * i + 1]);
+		data[i] = data[i] << 8;
+		data[i] += (uint16_t)(c[2 * i]);
 	}
-	Lms8fe_SPI_write(lms, maddress2, 0, 0x0001); // start the Do_command()
-	//std::this_thread::sleep_for(std::chrono::milliseconds(100));	
+	addr[size / 2] = maddress2;
+	data[size / 2] = 0x0001;
+	LMS_WriteEXTBRD(lms, addr, data, (unsigned int)(size / 2) + 1);
+/*
+	cout << "SPI Write ";  // B.J.
+    uint8_t X10, X1 = 0x00;
+    for (int j=0; j < size; j++) {
+        ConvertToAscii(c[j], &X10, &X1);
+        cout << X10 << X1 <<" ";
+    }
+	cout << "01" << "00" <<" ";
+    cout << std::endl;
+*/
+	//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	return 0;
 }
 
+/*
 int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
 {
 	uint16_t maddress = MADDRESS;
@@ -1455,7 +1498,7 @@ int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
 
 	while ((i < 10) && (!m_bfound))
 	{
-		
+
 		Lms8fe_SPI_read(lms, maddress2, 0, &data);
 		if ((data & 0x00FF) == 0x0000)
 			m_bfound = true;
@@ -1467,15 +1510,168 @@ int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
 	}
 	if (m_bfound)
 	{
-		ret = ((data & 0xFF00) >> 8);  // number of bytes returned
-		for (i = 0; i < size / 2; i++)
+		ret = ((data & 0xFF00) >> 8); // number of bytes returned
+		for (i = 0; i < (size / 2); i++)
 		{
 			Lms8fe_SPI_read(lms, maddress, i, &data);
 			c[2 * i + 1] = (uint8_t)(data >> 8);
 			c[2 * i] = (uint8_t)(data & 0x00FF);
+			// return size;
 		}
 	}
-	else ret = 0;
-	return ret;	
+	else
+		ret = 0;
+	return size;
+}
+*/
+
+/*
+int Lms8fe_spi_read_buffer2(lms_device_t *lms, unsigned char *c, int size)
+{
+	uint16_t maddress = MADDRESS;
+	uint16_t maddress2 = MADDRESS2;
+	uint16_t data = 0;
+	bool m_bfound = false;
+	int ret = 0;
+	int i = 0;
+
+	uint32_t addr[64];
+	uint32_t dataa[64];
+	uint8_t cx[64 * 2];
+
+	for (i = 0; i < (size / 2); i++)
+	{
+		addr[i] = i + maddress;
+		dataa[i] = 0;
+	}
+
+	addr[i] = maddress;
+	dataa[i] = 0;
+	i++;
+
+	addr[i] = maddress;
+	dataa[i] = 0;
+	i++;
+
+	for (i = 0; i < 64 * 2; i++)
+		cx[i] = 0x00;
+
+	m_bfound = true;
+	if (m_bfound)
+	{
+		LMS_ReadEXTBRD(lms, addr, dataa, (unsigned int)(size / 2) + 2);
+		for (int i = 0; i < (size / 2) + 2; i++)
+		{
+			cx[2 * i + 1] = (uint8_t)(dataa[i] >> 8);
+			cx[2 * i] = (uint8_t)(dataa[i] & 0x00FF);
+		}
+
+		for (i = 0; i < size; i++)
+			c[i] = cx[i + 8];
+	}
+	else
+		ret = 0;
+	return size;
+}
+*/
+
+void ConvertToAscii(uint8_t ch, uint8_t *pX10, uint8_t *pX1)
+{
+
+  uint8_t X10, X1 = 0;
+
+  X10 = ((ch & 0xF0) >> 4);
+  X1 = (ch & 0x0F);
+
+  if (X10 > 9)
+    X10 = X10 + 0x37; // A-F
+  else
+    X10 = X10 + 0x30; // 0-9
+
+  if (X1 > 9)
+    X1 = X1 + 0x37;
+  else
+    X1 = X1 + 0x30;
+
+  *pX10 = X10;
+  *pX1 = X1;
+}
+
+
+int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size)
+{
+	uint16_t maddress = MADDRESS;
+	uint16_t maddress2 = MADDRESS2;
+	bool m_bfound = false;
+	int ret = 0;
+	int i = 0;
+	int k = 0;
+
+	uint32_t addr[64];
+	uint32_t dataa[64];
+	uint8_t cx[128];
+
+	for (i = 0; i < 64; i++)
+	{
+		cx[2 * i] = 0x00;
+		cx[2 * i + 1] = 0x00;
+		addr[i] = 0;
+		dataa[i] = 0;
+	}
+
+	k = 0;
+	addr[k] = maddress2;
+	k++;
+
+	for (i = 0; i < (size / 2); i++)
+	{
+		addr[k] = i + maddress;
+		k++;
+	}
+	// dummy read
+	for (i = 0; i < 10; i++)
+	{
+		addr[k] = maddress + (size / 2) - 1; // the last one
+		k++;
+	}
+
+	LMS_ReadEXTBRD(lms, addr, dataa, k);
+
+	for (i = 0; i < k; i++)
+	{
+		cx[2 * i + 1] = (uint8_t)(dataa[i] >> 8);
+		cx[2 * i] = (uint8_t)(dataa[i] & 0x00FF);
+	}
+/*
+    cout << "SPI Read ";  // B.J.
+    uint8_t X10, X1 = 0x00;
+    for (int j=0; j < 2*k; j++) {
+        ConvertToAscii(cx[j], &X10, &X1);
+        cout << X10 << X1 <<" ";
+    }
+    cout << std::endl;
+*/    
+
+	m_bfound = false;
+	i = 0;
+	while ((!m_bfound) && (i < 2 * k))
+	{
+		if (cx[i] == 0xAA)
+			m_bfound = true;
+		i = i+2;
+	}
+	
+	if ((m_bfound) && ((i+size) <= 2*k))
+	{
+		for (int j = 0; j < size; j++)
+			c[j] = cx[i + j];
+		return size;
+	}
+	else {
+		for (int j = 0; j < size; j++)
+			c[j] = 0x00;
+		return -1;
+	}
+		
 }
 // end B.J.

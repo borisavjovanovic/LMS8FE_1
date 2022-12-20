@@ -17,12 +17,29 @@
 
 #include "LMS8FE_channel_image.h"
 
+// B.J.
+const long LMS8FE_wxgui::ID_READING_FINISHED_EVENT = wxNewId();
+
+wxBEGIN_EVENT_TABLE(LMS8FE_wxgui, wxWindow)
+	EVT_TIMER(TIMER_ID2, LMS8FE_wxgui::OnTimer)
+		wxEND_EVENT_TABLE()
+
+			void LMS8FE_wxgui::OnTimer(wxTimerEvent &event)
+{
+	run();
+}
+
+void LMS8FE_wxgui::run()
+{
+	UpdateSC1905(false);
+}
+
 LMS8FE_wxgui::LMS8FE_wxgui(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size, long styles)
 	: LMS8FE_view(parent, id, title, pos, size)
 {
 	lmsControl = nullptr;
-
 	lms8fe = nullptr;
+	m_timer = new wxTimer(this, TIMER_ID2);
 
 	UpdateLMS8FEForm();
 
@@ -170,7 +187,9 @@ void LMS8FE_wxgui::OnClose_LMS8FE_view(wxCommandEvent &event)
 	//	threadID++;
 	//	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-	stopTimerSC1905UpdateThread();
+	// B.J. thread  commented this
+	// stopTimerSC1905UpdateThread();
+	m_timer->Stop();
 }
 
 void LMS8FE_wxgui::OnbtnOpenPort(wxCommandEvent &event)
@@ -182,7 +201,7 @@ void LMS8FE_wxgui::OnbtnOpenPort(wxCommandEvent &event)
 	//		AddMssg("Port already opened.");
 	//		return;
 	//	}
-
+	unsigned char cinfo[4];
 	wxString PortName = cmbbPorts->GetValue();
 
 	if (lms8fe)
@@ -259,16 +278,20 @@ void LMS8FE_wxgui::OnbtnOpenPort(wxCommandEvent &event)
 						lms8fe = new LMS8FE_Device(nullptr, com);
 			*/
 		}
-		else {
-			lms8fe = LMS8FE_Open(nullptr, lmsControl);
-			//AddMssg("poruka1");
-	    }
+		else
+		{
+			lms8fe = LMS8FE_Open(nullptr, lmsControl);			
+		}
 
-		   		if (lms8fe == nullptr)
+		if (lms8fe == nullptr)
 		{
 			AddMssg("Error initializing serial port");
 			return;
 		}
+		else {
+			int result = LMS8FE_GetInfo(lms8fe, cinfo);
+		}
+
 	}
 	/*
 		boardInfo info;
@@ -322,8 +345,6 @@ void LMS8FE_wxgui::OnbtnOpenPort(wxCommandEvent &event)
 		AddMssg(msg);
 	*/
 
-	unsigned char cinfo[4];
-
 	int result = LMS8FE_GetInfo(lms8fe, cinfo);
 	if (result != LMS8FE_SUCCESS)
 	{
@@ -368,7 +389,10 @@ void LMS8FE_wxgui::stopTimerSC1905UpdateThread()
 void LMS8FE_wxgui::OnbtnClosePort(wxCommandEvent &event)
 {
 	// milans 220608
-	stopTimerSC1905UpdateThread();
+	
+	// B.J. thread
+	// stopTimerSC1905UpdateThread();
+	m_timer->Stop();
 
 	LMS8FE_Close(lms8fe);
 	lms8fe = nullptr;
@@ -1167,9 +1191,10 @@ void LMS8FE_wxgui::OnbtnSC1905_Reset_RFPAL(wxCommandEvent &event)
 	}
 }
 
+// not executing now, we created threads instead
 void LMS8FE_wxgui::timerSC1905UpdateThreadFunction(float interval, int id, std::atomic<int> &currID)
 {
-	int millis = interval * 2000; // B.J. promenio
+	int millis = interval * 10000; // B.J. promenio
 	char mssg[100];
 	//	bool doLoop = true;
 	//	while (doLoop) {
@@ -1186,7 +1211,10 @@ void LMS8FE_wxgui::timerSC1905UpdateThreadFunction(float interval, int id, std::
 		// Segmentation fault
 		// kao da je duzina teksta koji treba da se smesti u polje veca od predvidjene duzine
 
-		UpdateSC1905();
+		// kontrole na dijalogu ne smeju da se updejtuju u threadu
+		// u thread-u treba da se obavi citanje a tek onda, van thread-a, da se te informacije updejtuju u dijalog
+
+		UpdateSC1905(false);	
 		//		AddMssg(mssg);
 		//		if (!continue_flag) {
 		if (id != currID)
@@ -1315,13 +1343,18 @@ void LMS8FE_wxgui::OnchSC1905_Update_Rate(wxCommandEvent &event)
 
 		//		timerSC1905UpdateActive = true;
 
-		timerSC1905Update = new std::thread(&LMS8FE_wxgui::timerSC1905UpdateThreadFunction, this, interval, (int)threadID, std::ref(threadID));
-		timerSC1905Update->detach();
-		//		std::thread tmp(&LMS8FE_wxgui::timerSC1905UpdateThreadFunction, interval);
+		// B.J. threads
+		// timerSC1905Update = new std::thread(&LMS8FE_wxgui::timerSC1905UpdateThreadFunction, this, interval, (int)threadID, std::ref(threadID));
+		// timerSC1905Update->detach();
+		m_timer->Start((int)(10000.0 * interval));
+		// std::thread tmp(&LMS8FE_wxgui::timerSC1905UpdateThreadFunction, interval);
 	}
 	else
 	{
-		// milans 220616
+		// B.J. threads
+		m_timer->Stop();
+		
+				// milans 220616
 		//  Uncomment this, when the SC1905 is connected
 		//  I commented it for the development, without the SC1905 connected
 		//		interval = 1;
@@ -2070,17 +2103,27 @@ void LMS8FE_wxgui::OnmiLMS8001(wxCommandEvent &event)
 	{
 		//		lms8001GUI = new LMS8SuiteAppFrame(this, wxNewId(), _("LMS8001"));
 		lms8001GUI = new LMS8SuiteAppFrame(this);
-
-		//milans 221125 - added (int)
-		if (((int)dev->com.hComm) > -1) { // B.J. added check
-		//		if (dev->com.hComm > -1) { // B.J. added check
-
-			lms8001GUI->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(LMS8FE_wxgui::OnLMS8001Close), NULL, this);
-			// milans 220610
-			// This is not multiplatform, since HANDLE is only for Windows... Make it work on Linux as well... !!!!!!!!!!!!!!!!!			
+		//cout << "(int)dev->com.hComm =" << (int)dev->com.hComm << std::endl; // B.J.
+		wxCommandEvent event;
+		// milans 221125 - added (int)
+		if (((int)dev->com.hComm) > -1)
+		{ // B.J. added check
 			lms8001GUI->Initialize(dev->com.hComm);
-			lms8001GUI->Show();
+			lms8001GUI->InitializeSDR(nullptr);
+			lms8001GUI->OnControlBoardConnect(event);
+			// milans 220610
+			// This is not multiplatform, since HANDLE is only for Windows... Make it work on Linux as well... !!!!!!!!!!!!!!!!!
 		}
+
+		else if (lmsControl != nullptr)
+		{
+			// lms8001GUI->Initialize(-1);
+			lms8001GUI->InitializeSDR(lmsControl);
+			lms8001GUI->OnControlBoardConnect(event);
+		}
+
+		lms8001GUI->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(LMS8FE_wxgui::OnLMS8001Close), NULL, this);
+		lms8001GUI->Show();
 	}
 }
 
@@ -2438,7 +2481,6 @@ void LMS8FE_wxgui::Detailed2Simple()
 }
 
 // B.J.
-// temporary
 void LMS8FE_wxgui::OnbtnWRITESPI(wxCommandEvent &event)
 {
 	uint16_t regValue = 0x0000;
@@ -2458,8 +2500,16 @@ void LMS8FE_wxgui::OnbtnWRITESPI(wxCommandEvent &event)
 		AddMssg("Invalid value");
 		return;
 	}
-	LMS8FE_SPI_write(lms8fe, 0, addr, data);
-	
+
+	if (cbSingle->IsChecked())
+		LMS8FE_SPI_write(lms8fe, 170 * 32, addr, data);
+	else
+	{
+		uint8_t c[64];
+		for (int i = 0; i <= 63; i++)
+			c[i] = 100 + i;
+		LMS8FE_SPI_write_buffer(lms8fe, c, 64);
+	}	
 }
 void LMS8FE_wxgui::OnbtnREADSPI(wxCommandEvent &event)
 {
@@ -2475,10 +2525,21 @@ void LMS8FE_wxgui::OnbtnREADSPI(wxCommandEvent &event)
 		return;
 	}
 
-	LMS8FE_SPI_read(lms8fe, 0, addr, &regValue); // dummy read
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	sprintf(mssg, "addr=0x%04x, retValue=0x%04x", addr, regValue);
-	AddMssg(mssg);
+	if (cbSingle->IsChecked())
+	{
+		LMS8FE_SPI_read(lms8fe, 170 * 32, addr, &regValue); // dummy read
+		sprintf(mssg, "addr=0x%04x, retValue=0x%04x", addr, regValue);
+		AddMssg(mssg);
+	}
+	else
+	{
+		uint8_t c[64];
+		LMS8FE_SPI_read_buffer(lms8fe, c, 64);
+		for (int i = 0; i <= 63; i++)
+		{
+			sprintf(mssg, "c[%d]=0x%02x", i, c[i]);
+			AddMssg(mssg);
+		}
+	}
 
 }

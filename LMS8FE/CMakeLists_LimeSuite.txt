@@ -81,3 +81,4 @@ add_subdirectory(examples)
 #    lms8suite
 #    ${wxWidgets_LIBRARIES}
 #)
+

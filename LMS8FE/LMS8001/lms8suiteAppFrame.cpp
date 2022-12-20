@@ -139,6 +139,8 @@ LMS8SuiteAppFrame::LMS8SuiteAppFrame(wxWindow *parent) : lms8_AppFrame_view(pare
 #ifndef __unix__
 	SetIcon(wxIcon(_("aaaaAPPicon")));
 #endif
+	
+	lmsControlSDR = nullptr;
 	//    programmer = nullptr;
 	//    fftviewer = nullptr;
 	adfGUI = nullptr;
@@ -183,6 +185,7 @@ LMS8SuiteAppFrame::LMS8SuiteAppFrame(wxWindow *parent) : lms8_AppFrame_view(pare
 	wxCommandEvent evt;
 	//	OnDataBoardConnect(evt);
 	OnControlBoardConnect(evt);
+
 }
 
 LMS8SuiteAppFrame::~LMS8SuiteAppFrame()
@@ -227,7 +230,7 @@ void LMS8SuiteAppFrame::OnAbout(wxCommandEvent &event)
 void LMS8SuiteAppFrame::OnControlBoardConnect(wxCommandEvent &event)
 {
 	const int controlCollumn = 1;
-	if (lms8controlPort->IsOpen())
+	if ((lms8controlPort->IsOpen())||(lmsControlSDR!=nullptr))
 	{
 		LMSinfo info = lms8controlPort->GetInfo();
 		wxString controlDev = _("Control port: ");
@@ -446,8 +449,23 @@ void LMS8SuiteAppFrame::Initialize(HANDLE handle)
 // B.J. -- unix support
 void LMS8SuiteAppFrame::Initialize(int handle)
 {
+	cout << "LMS8Suite: handle =" << (int) handle << std::endl;  // B.J.
 	lms8controlPort->InheritCOM(handle);
 	lms8controlPort->lms8fe_do_mask = true;
 	lms8controlPort->lms8fe_cmd_mask = 0x80;
 }
 #endif
+
+void LMS8SuiteAppFrame::InitializeSDR(lms_device_t *lms)
+{
+	lmsControlSDR = lms;
+	lms8controlPort->InitializeSDR(lms); 
+	// B.J.
+	// ovo me zezalo!
+	lms8controlPort->lms8fe_do_mask = true;
+	lms8controlPort->lms8fe_cmd_mask = 0x80;
+	//
+	cout << "SDR initialization: ";
+	if (lms == nullptr) cout << "NULL ptr!";
+	cout << std::endl;  // B.J.
+}

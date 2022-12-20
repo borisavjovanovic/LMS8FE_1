@@ -201,6 +201,13 @@ extern "C"
 	int Lms8fe_read_buffer_fd(LMS8FE_COM com, unsigned char *data, int size);
 	int Lms8fe_write_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, int size);
 	int Lms8fe_read_buffer(lms_device_t *dev, LMS8FE_COM com, unsigned char *data, int size);
+
+	//int Lms8fe_spi_read_buffer2(lms_device_t *lms, unsigned char *c, int size);
+	int Lms8fe_spi_read_buffer(lms_device_t *lms, unsigned char *c, int size);  // B.J.
+	int Lms8fe_spi_write_buffer(lms_device_t *lms, unsigned char *c, int size);
+	
+
+
 	int Lms8fe_my_read(LMS8FE_COM com, char *buffer, int count);
 	int Lms8fe_my_write(LMS8FE_COM com, char *buffer, int count);
 	int Lms8fe_serialport_write(LMS8FE_COM com, const char *str, int len);
@@ -209,7 +216,7 @@ extern "C"
 	int Lms8fe_serialport_close(LMS8FE_COM com);
 	int Lms8fe_Cmd_GetInfo(lms_device_t *dev, LMS8FE_COM com, Lms8fe_boardInfo *info);
 	int Lms8fe_Cmd_GetConfig(lms_device_t *dev, LMS8FE_COM com, lms8fe_boardState *state);
-	int Lms8fe_Cmd_Hello(LMS8FE_COM com);
+	int Lms8fe_Cmd_Hello(lms_device_t *dev, LMS8FE_COM com);
 	int Lms8fe_Cmd_LoadConfig(lms_device_t *dev, LMS8FE_COM com, const char *filename);
 	int Lms8fe_Cmd_Reset(lms_device_t *dev, LMS8FE_COM com);
 //milans 221128
